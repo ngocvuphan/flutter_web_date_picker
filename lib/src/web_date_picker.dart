@@ -8,11 +8,17 @@ const _kSlideTransitionDuration = Duration(milliseconds: 300);
 Future<DateTime?> showWebDatePicker({
   required BuildContext context,
   required DateTime initialDate,
+  DateTime? firstDate,
+  DateTime? lastDate,
 }) {
   //PopupMenuButton
   return showPopupDialog(
     context,
-    (context) => _WebDatePicker(initialDate: initialDate),
+    (context) => _WebDatePicker(
+      initialDate: initialDate,
+      firstDate: firstDate ?? DateTime(0),
+      lastDate: lastDate ?? DateTime(100000),
+    ),
     asDropDown: true,
     useTargetWidth: true,
   );
@@ -21,9 +27,13 @@ Future<DateTime?> showWebDatePicker({
 class _WebDatePicker extends StatefulWidget {
   const _WebDatePicker({
     required this.initialDate,
+    required this.firstDate,
+    required this.lastDate,
   });
 
   final DateTime initialDate;
+  final DateTime firstDate;
+  final DateTime lastDate;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -47,8 +57,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   List<Widget> _buildDaysOfMonthCells(ThemeData theme) {
     final textStyle = theme.textTheme.bodySmall?.copyWith(color: Colors.black);
     final now = DateTime.now();
-    final monthDateRange =
-        _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: true);
+    final monthDateRange = _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: true);
     final children = kWeekdayAbbreviations
         .map<Widget>(
           (e) => Container(
@@ -60,37 +69,39 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         .toList();
     for (int i = 0; i < kNumberCellsOfMonth; i++) {
       final date = monthDateRange.start.add(Duration(days: i));
+      final isEnabled = (_startDate.month == date.month) && (date.dateCompareTo(widget.firstDate) >= 0) && (date.dateCompareTo(widget.lastDate) <= 0);
       final isSelected = date.dateCompareTo(_selectedDate) == 0;
       final isNow = date.dateCompareTo(now) == 0;
-      final child = _startDate.month == date.month
-          ? Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: InkWell(
-                onTap: () => setState(() => _selectedDate = date),
-                customBorder: const CircleBorder(),
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected ? theme.colorScheme.primary : null,
-                    border: isNow
-                        ? Border.all(color: theme.colorScheme.primary)
-                        : null,
-                  ),
-                  child: Text(
-                    date.day.toString(),
-                    style: isSelected
-                        ? textStyle?.copyWith(
-                            color: theme.colorScheme.onPrimary)
-                        : textStyle,
-                  ),
-                ),
-              ),
-            )
-          : Center(
-              child: Text(date.day.toString(),
-                  style: textStyle?.copyWith(color: theme.disabledColor)));
-      children.add(child);
+      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      Widget child = Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isSelected ? color : null,
+          border: isNow && !isSelected ? Border.all(color: color) : null,
+        ),
+        child: Text(
+          date.day.toString(),
+          style: isSelected
+              ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
+              : isEnabled
+                  ? textStyle
+                  : textStyle?.copyWith(color: theme.disabledColor),
+        ),
+      );
+      if (isEnabled) {
+        child = InkWell(
+          onTap: () => setState(() => _selectedDate = date),
+          customBorder: const CircleBorder(),
+          child: child,
+        );
+      }
+      children.add(
+        Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: child,
+        ),
+      );
     }
     return children;
   }
@@ -102,31 +113,39 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final now = DateTime.now();
     for (int i = 1; i <= kNumberOfMonth; i++) {
       final date = DateTime(_startDate.year, i);
+      final isEnabled = (date.monthCompareTo(widget.firstDate) >= 0) && (date.monthCompareTo(widget.lastDate) <= 0);
       final isSelected = date.monthCompareTo(_selectedDate) == 0;
       final isNow = date.monthCompareTo(now) == 0;
-      final child = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-        child: InkWell(
-          onTap: () => _onViewModeChanged(next: false, date: date),
+      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      Widget child = Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? color : null,
+          border: isNow && !isSelected ? Border.all(color: color) : null,
           borderRadius: borderRadius,
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: isSelected ? theme.colorScheme.primary : null,
-              border:
-                  isNow ? Border.all(color: theme.colorScheme.primary) : null,
-              borderRadius: borderRadius,
-            ),
-            child: Text(
-              kMonthShortNames[i - 1],
-              style: isSelected
-                  ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
-                  : textStyle,
-            ),
-          ),
+        ),
+        child: Text(
+          kMonthShortNames[i - 1],
+          style: isSelected
+              ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
+              : isEnabled
+                  ? textStyle
+                  : textStyle?.copyWith(color: theme.disabledColor),
         ),
       );
-      children.add(child);
+      if (isEnabled) {
+        child = InkWell(
+          onTap: () => _onViewModeChanged(next: false, date: date),
+          borderRadius: borderRadius,
+          child: child,
+        );
+      }
+      children.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          child: child,
+        ),
+      );
     }
     return children;
   }
@@ -139,31 +158,39 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final year = _startDate.year - _startDate.year % 20;
     for (int i = 0; i < 20; i++) {
       final date = DateTime(year + i);
+      final isEnabled = (date.year >= widget.firstDate.year) && (date.year <= widget.lastDate.year);
       final isSelected = date.year == _selectedDate.year;
       final isNow = date.year == now.year;
-      final child = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-        child: InkWell(
-          onTap: () => _onViewModeChanged(next: false, date: date),
+      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      Widget child = Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? color : null,
+          border: isNow && !isSelected ? Border.all(color: color) : null,
           borderRadius: borderRadius,
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: isSelected ? theme.colorScheme.primary : null,
-              border:
-                  isNow ? Border.all(color: theme.colorScheme.primary) : null,
-              borderRadius: borderRadius,
-            ),
-            child: Text(
-              (year + i).toString(),
-              style: isSelected
-                  ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
-                  : textStyle,
-            ),
-          ),
+        ),
+        child: Text(
+          (year + i).toString(),
+          style: isSelected
+              ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
+              : isEnabled
+                  ? textStyle
+                  : textStyle?.copyWith(color: theme.disabledColor),
         ),
       );
-      children.add(child);
+      if (isEnabled) {
+        child = InkWell(
+          onTap: () => _onViewModeChanged(next: false, date: date),
+          borderRadius: borderRadius,
+          child: child,
+        );
+      }
+      children.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          child: child,
+        ),
+      );
     }
     return children;
   }
@@ -176,32 +203,40 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final year = _startDate.year - _startDate.year % 200;
     for (int i = 0; i < 10; i++) {
       final date = DateTime(year + i * 20);
-      final isSelected = _selectedDate.year >= date.year &&
-          (_selectedDate.year - date.year) < 20;
+      final isEnabled =
+          (widget.firstDate.year <= date.year || (widget.firstDate.year - date.year) <= 20) && (date.year + 20 <= widget.lastDate.year || (date.year - widget.lastDate.year) <= 0);
+      final isSelected = _selectedDate.year >= date.year && (_selectedDate.year - date.year) < 20;
       final isNow = now.year >= date.year && (now.year - date.year) < 20;
-      final child = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: InkWell(
-          onTap: () => _onViewModeChanged(next: false, date: date),
+      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      Widget child = Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? color : null,
+          border: isNow && !isSelected ? Border.all(color: color) : null,
           borderRadius: borderRadius,
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: isSelected ? theme.colorScheme.primary : null,
-              border:
-                  isNow ? Border.all(color: theme.colorScheme.primary) : null,
-              borderRadius: borderRadius,
-            ),
-            child: Text(
-              "${date.year} - ${date.year + 19}",
-              style: isSelected
-                  ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
-                  : textStyle,
-            ),
-          ),
+        ),
+        child: Text(
+          "${date.year} - ${date.year + 19}",
+          style: isSelected
+              ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
+              : isEnabled
+                  ? textStyle
+                  : textStyle?.copyWith(color: theme.disabledColor),
         ),
       );
-      children.add(child);
+      if (isEnabled) {
+        child = InkWell(
+          onTap: () => _onViewModeChanged(next: false, date: date),
+          borderRadius: borderRadius,
+          child: child,
+        );
+      }
+      children.add(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: child,
+        ),
+      );
     }
     return children;
   }
@@ -247,121 +282,163 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     String actionText;
+    bool isFirst = false, isLast = false, nextView = true;
     switch (_viewMode) {
       case _PickerViewMode.day:
         actionText = "${kMonthNames[_startDate.month - 1]} ${_startDate.year}";
+        final monthDateRange = _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: false);
+        isFirst = widget.firstDate.dateCompareTo(monthDateRange.start) >= 0;
+        isLast = widget.lastDate.dateCompareTo(monthDateRange.end) <= 0;
+        nextView = widget.lastDate.difference(widget.firstDate).inDays > 28;
         break;
       case _PickerViewMode.month:
         actionText = _startDate.year.toString();
+        isFirst = _startDate.year <= widget.firstDate.year;
+        isLast = _startDate.year >= widget.lastDate.year;
+        nextView = widget.lastDate.year != widget.firstDate.year;
         break;
       case _PickerViewMode.year:
         final year = _startDate.year - _startDate.year % 20;
+        isFirst = year <= widget.firstDate.year;
+        isLast = year + 20 >= widget.lastDate.year;
         actionText = "$year - ${year + 19}";
+        nextView = widget.lastDate.year - widget.firstDate.year > 20;
         break;
       case _PickerViewMode.century:
         final year = _startDate.year - _startDate.year % 200;
+        isFirst = year <= widget.firstDate.year;
+        isLast = year + 200 >= widget.lastDate.year;
         actionText = "$year - ${year + 199}";
+        nextView = false;
         break;
     }
-    return Container(
-      padding: const EdgeInsets.all(1.0),
-      margin: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Card(
-        margin: const EdgeInsets.all(0.0),
-        elevation: 1.0,
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  InkWell(
-                    onTap: () => _onStartDateChanged(next: false),
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      height: 36.0,
-                      width: 36.0,
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.keyboard_arrow_left),
-                    ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _onViewModeChanged(next: true),
-                      borderRadius: BorderRadius.circular(4.0),
-                      child: Container(
+    return Card(
+      margin: const EdgeInsets.only(left: 1.0, top: 4.0, right: 1.0, bottom: 2.0),
+      elevation: 1.0,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                isFirst
+                    ? Container(
                         height: 36.0,
+                        width: 36.0,
                         alignment: Alignment.center,
-                        child: Text(
-                          actionText,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                              color: Colors.black, fontWeight: FontWeight.bold),
+                        child: Icon(Icons.keyboard_arrow_left, color: theme.disabledColor),
+                      )
+                    : InkWell(
+                        onTap: () => _onStartDateChanged(next: false),
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          height: 36.0,
+                          width: 36.0,
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.keyboard_arrow_left),
                         ),
                       ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () => _onStartDateChanged(next: true),
-                    customBorder: const CircleBorder(),
-                    child: Container(
-                      height: 36.0,
-                      width: 36.0,
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.keyboard_arrow_right),
-                    ),
-                  ),
-                ],
-              ),
-              ClipRRect(
-                child: AnimatedSwitcher(
-                  duration: _kSlideTransitionDuration,
-                  transitionBuilder: (child, animation) {
-                    if (_isViewModeChanged) {
-                      return ScaleTransition(
-                        scale: animation,
-                        child: child,
-                      );
-                    } else {
-                      double dx = (child.key as _PickerKey).date == _startDate
-                          ? 1.0
-                          : -1.0;
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                                begin: Offset(dx * _slideDirection, 0.0),
-                                end: const Offset(0.0, 0.0))
-                            .animate(animation),
-                        child: child,
-                      );
-                    }
-                  },
-                  child: _buildChild(theme),
+                Expanded(
+                  child: nextView
+                      ? InkWell(
+                          onTap: () => _onViewModeChanged(next: true),
+                          borderRadius: BorderRadius.circular(4.0),
+                          child: Container(
+                            height: 36.0,
+                            alignment: Alignment.center,
+                            child: Text(
+                              actionText,
+                              style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          height: 36.0,
+                          alignment: Alignment.center,
+                          child: Text(
+                            actionText,
+                            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                          ),
+                        ),
                 ),
+                isLast
+                    ? Container(
+                        height: 36.0,
+                        width: 36.0,
+                        alignment: Alignment.center,
+                        child: Icon(Icons.keyboard_arrow_right, color: theme.disabledColor),
+                      )
+                    : InkWell(
+                        onTap: () => _onStartDateChanged(next: true),
+                        customBorder: const CircleBorder(),
+                        child: Container(
+                          height: 36.0,
+                          width: 36.0,
+                          alignment: Alignment.center,
+                          child: const Icon(Icons.keyboard_arrow_right),
+                        ),
+                      ),
+              ],
+            ),
+            ClipRRect(
+              child: AnimatedSwitcher(
+                duration: _kSlideTransitionDuration,
+                transitionBuilder: (child, animation) {
+                  if (_isViewModeChanged) {
+                    return ScaleTransition(
+                      scale: animation,
+                      child: child,
+                    );
+                  } else {
+                    double dx = (child.key as _PickerKey).date == _startDate ? 1.0 : -1.0;
+                    return SlideTransition(
+                      position: Tween<Offset>(begin: Offset(dx * _slideDirection, 0.0), end: const Offset(0.0, 0.0)).animate(animation),
+                      child: child,
+                    );
+                  }
+                },
+                child: _buildChild(theme),
               ),
-              Row(
-                children: [
-                  TextButton(
-                    onPressed: () => _onStartDateChanged(),
-                    child: const Text("TODAY"),
+            ),
+            Row(
+              children: [
+                InkWell(
+                  onTap: _onResetState,
+                  customBorder: const CircleBorder(),
+                  child: Container(
+                    height: 36.0,
+                    width: 36.0,
+                    alignment: Alignment.center,
+                    child: const Tooltip(message: "Reset", child: Icon(Icons.restart_alt)),
                   ),
-                  const Spacer(),
+                ),
+                const SizedBox(width: 4.0),
+                InkWell(
+                  onTap: _onStartDateChanged,
+                  customBorder: const CircleBorder(),
+                  child: Container(
+                    height: 36.0,
+                    width: 36.0,
+                    alignment: Alignment.center,
+                    child: const Tooltip(message: "Today", child: Icon(Icons.today)),
+                  ),
+                ),
+                const Spacer(),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.secondary),
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text("CANCEL", style: TextStyle(color: theme.colorScheme.onSecondary)),
+                ),
+                if (_viewMode == _PickerViewMode.day) ...[
+                  const SizedBox(width: 8.0),
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.secondary),
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text("CANCEL",
-                        style: TextStyle(color: theme.colorScheme.onSecondary)),
+                    onPressed: () => Navigator.of(context).pop(_selectedDate),
+                    child: const Text("OK"),
                   ),
-                  if (_viewMode == _PickerViewMode.day) ...[
-                    const SizedBox(width: 8.0),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(_selectedDate),
-                      child: const Text("OK"),
-                    ),
-                  ]
-                ],
-              ),
-            ],
-          ),
+                ]
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -392,12 +469,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       date = DateTime.now();
       if (_viewMode == _PickerViewMode.day && date.month == _startDate.month ||
           _viewMode == _PickerViewMode.month && date.year == _startDate.year ||
-          _viewMode == _PickerViewMode.year &&
-              date.year >= year20 &&
-              (date.year - year20) < 20 ||
-          _viewMode == _PickerViewMode.century &&
-              date.year >= year200 &&
-              (date.year - year200) < 200) {
+          _viewMode == _PickerViewMode.year && date.year >= year20 && (date.year - year20) < 20 ||
+          _viewMode == _PickerViewMode.century && date.year >= year200 && (date.year - year200) < 200) {
         return;
       }
     }
@@ -418,6 +491,18 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         _startDate = date;
       }
     });
+  }
+
+  void _onResetState() {
+    setState(
+      () {
+        _slideDirection = widget.initialDate.isAfter(_startDate) ? 1.0 : -1.0;
+        _startDate = widget.initialDate;
+        _selectedDate = _startDate;
+        _isViewModeChanged = _viewMode != _PickerViewMode.day;
+        _viewMode = _PickerViewMode.day;
+      },
+    );
   }
 
   void _onSizeChanged(Size size, Size cellSize) {
@@ -469,9 +554,7 @@ class _PickerKey extends LocalKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _PickerKey &&
-        other.date == date &&
-        other.viewMode == viewMode;
+    return other is _PickerKey && other.date == date && other.viewMode == viewMode;
   }
 
   @override
