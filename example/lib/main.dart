@@ -31,12 +31,14 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Web Date Picker Demo',
       theme: ThemeData(/* useMaterial3: true, */ colorScheme: lightColorScheme),
-      darkTheme: ThemeData(/* useMaterial3: true, */ colorScheme: darkColorScheme),
+      darkTheme:
+          ThemeData(/* useMaterial3: true, */ colorScheme: darkColorScheme),
       home: Scaffold(
         body: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 360.0),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
             child: TextField(
               key: textFieldKey,
               controller: _controller,

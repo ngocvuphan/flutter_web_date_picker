@@ -57,7 +57,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   List<Widget> _buildDaysOfMonthCells(ThemeData theme) {
     final textStyle = theme.textTheme.bodySmall?.copyWith(color: Colors.black);
     final now = DateTime.now();
-    final monthDateRange = _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: true);
+    final monthDateRange =
+        _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: true);
     final children = kWeekdayAbbreviations
         .map<Widget>(
           (e) => Container(
@@ -69,10 +70,14 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         .toList();
     for (int i = 0; i < kNumberCellsOfMonth; i++) {
       final date = monthDateRange.start.add(Duration(days: i));
-      final isEnabled = (_startDate.month == date.month) && (date.dateCompareTo(widget.firstDate) >= 0) && (date.dateCompareTo(widget.lastDate) <= 0);
+      final isEnabled = (_startDate.month == date.month) &&
+          (date.dateCompareTo(widget.firstDate) >= 0) &&
+          (date.dateCompareTo(widget.lastDate) <= 0);
       final isSelected = date.dateCompareTo(_selectedDate) == 0;
       final isNow = date.dateCompareTo(now) == 0;
-      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      final color = isEnabled
+          ? theme.colorScheme.primary
+          : theme.colorScheme.primary.withOpacity(0.5);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -113,10 +118,13 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final now = DateTime.now();
     for (int i = 1; i <= kNumberOfMonth; i++) {
       final date = DateTime(_startDate.year, i);
-      final isEnabled = (date.monthCompareTo(widget.firstDate) >= 0) && (date.monthCompareTo(widget.lastDate) <= 0);
+      final isEnabled = (date.monthCompareTo(widget.firstDate) >= 0) &&
+          (date.monthCompareTo(widget.lastDate) <= 0);
       final isSelected = date.monthCompareTo(_selectedDate) == 0;
       final isNow = date.monthCompareTo(now) == 0;
-      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      final color = isEnabled
+          ? theme.colorScheme.primary
+          : theme.colorScheme.primary.withOpacity(0.5);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -158,10 +166,13 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final year = _startDate.year - _startDate.year % 20;
     for (int i = 0; i < 20; i++) {
       final date = DateTime(year + i);
-      final isEnabled = (date.year >= widget.firstDate.year) && (date.year <= widget.lastDate.year);
+      final isEnabled = (date.year >= widget.firstDate.year) &&
+          (date.year <= widget.lastDate.year);
       final isSelected = date.year == _selectedDate.year;
       final isNow = date.year == now.year;
-      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      final color = isEnabled
+          ? theme.colorScheme.primary
+          : theme.colorScheme.primary.withOpacity(0.5);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -203,11 +214,16 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final year = _startDate.year - _startDate.year % 200;
     for (int i = 0; i < 10; i++) {
       final date = DateTime(year + i * 20);
-      final isEnabled =
-          (widget.firstDate.year <= date.year || (widget.firstDate.year - date.year) <= 20) && (date.year + 20 <= widget.lastDate.year || (date.year - widget.lastDate.year) <= 0);
-      final isSelected = _selectedDate.year >= date.year && (_selectedDate.year - date.year) < 20;
+      final isEnabled = (widget.firstDate.year <= date.year ||
+              (widget.firstDate.year - date.year) <= 20) &&
+          (date.year + 20 <= widget.lastDate.year ||
+              (date.year - widget.lastDate.year) <= 0);
+      final isSelected = _selectedDate.year >= date.year &&
+          (_selectedDate.year - date.year) < 20;
       final isNow = now.year >= date.year && (now.year - date.year) < 20;
-      final color = isEnabled ? theme.colorScheme.primary : theme.colorScheme.primary.withOpacity(0.5);
+      final color = isEnabled
+          ? theme.colorScheme.primary
+          : theme.colorScheme.primary.withOpacity(0.5);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -286,7 +302,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     switch (_viewMode) {
       case _PickerViewMode.day:
         actionText = "${kMonthNames[_startDate.month - 1]} ${_startDate.year}";
-        final monthDateRange = _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: false);
+        final monthDateRange = _startDate.monthDateTimeRange(
+            includeTrailingAndLeadingDates: false);
         isFirst = widget.firstDate.dateCompareTo(monthDateRange.start) >= 0;
         isLast = widget.lastDate.dateCompareTo(monthDateRange.end) <= 0;
         nextView = widget.lastDate.difference(widget.firstDate).inDays > 28;
@@ -313,7 +330,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         break;
     }
     return Card(
-      margin: const EdgeInsets.only(left: 1.0, top: 4.0, right: 1.0, bottom: 2.0),
+      margin:
+          const EdgeInsets.only(left: 1.0, top: 4.0, right: 1.0, bottom: 2.0),
       elevation: 1.0,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -326,7 +344,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                         height: 36.0,
                         width: 36.0,
                         alignment: Alignment.center,
-                        child: Icon(Icons.keyboard_arrow_left, color: theme.disabledColor),
+                        child: Icon(Icons.keyboard_arrow_left,
+                            color: theme.disabledColor),
                       )
                     : InkWell(
                         onTap: () => _onStartDateChanged(next: false),
@@ -348,7 +367,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                             alignment: Alignment.center,
                             child: Text(
                               actionText,
-                              style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                              style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         )
@@ -357,7 +378,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                           alignment: Alignment.center,
                           child: Text(
                             actionText,
-                            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                 ),
@@ -366,7 +389,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                         height: 36.0,
                         width: 36.0,
                         alignment: Alignment.center,
-                        child: Icon(Icons.keyboard_arrow_right, color: theme.disabledColor),
+                        child: Icon(Icons.keyboard_arrow_right,
+                            color: theme.disabledColor),
                       )
                     : InkWell(
                         onTap: () => _onStartDateChanged(next: true),
@@ -390,9 +414,14 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                       child: child,
                     );
                   } else {
-                    double dx = (child.key as _PickerKey).date == _startDate ? 1.0 : -1.0;
+                    double dx = (child.key as _PickerKey).date == _startDate
+                        ? 1.0
+                        : -1.0;
                     return SlideTransition(
-                      position: Tween<Offset>(begin: Offset(dx * _slideDirection, 0.0), end: const Offset(0.0, 0.0)).animate(animation),
+                      position: Tween<Offset>(
+                              begin: Offset(dx * _slideDirection, 0.0),
+                              end: const Offset(0.0, 0.0))
+                          .animate(animation),
                       child: child,
                     );
                   }
@@ -409,7 +438,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                     height: 36.0,
                     width: 36.0,
                     alignment: Alignment.center,
-                    child: const Tooltip(message: "Reset", child: Icon(Icons.restart_alt)),
+                    child: const Tooltip(
+                        message: "Reset", child: Icon(Icons.restart_alt)),
                   ),
                 ),
                 const SizedBox(width: 4.0),
@@ -420,14 +450,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                     height: 36.0,
                     width: 36.0,
                     alignment: Alignment.center,
-                    child: const Tooltip(message: "Today", child: Icon(Icons.today)),
+                    child: const Tooltip(
+                        message: "Today", child: Icon(Icons.today)),
                   ),
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.secondary),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.secondary),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text("CANCEL", style: TextStyle(color: theme.colorScheme.onSecondary)),
+                  child: Text("CANCEL",
+                      style: TextStyle(color: theme.colorScheme.onSecondary)),
                 ),
                 if (_viewMode == _PickerViewMode.day) ...[
                   const SizedBox(width: 8.0),
@@ -469,8 +502,12 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       date = DateTime.now();
       if (_viewMode == _PickerViewMode.day && date.month == _startDate.month ||
           _viewMode == _PickerViewMode.month && date.year == _startDate.year ||
-          _viewMode == _PickerViewMode.year && date.year >= year20 && (date.year - year20) < 20 ||
-          _viewMode == _PickerViewMode.century && date.year >= year200 && (date.year - year200) < 200) {
+          _viewMode == _PickerViewMode.year &&
+              date.year >= year20 &&
+              (date.year - year20) < 20 ||
+          _viewMode == _PickerViewMode.century &&
+              date.year >= year200 &&
+              (date.year - year200) < 200) {
         return;
       }
     }
@@ -554,7 +591,9 @@ class _PickerKey extends LocalKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _PickerKey && other.date == date && other.viewMode == viewMode;
+    return other is _PickerKey &&
+        other.date == date &&
+        other.viewMode == viewMode;
   }
 
   @override
