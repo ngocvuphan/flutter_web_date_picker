@@ -4,14 +4,29 @@ import 'package:vph_common_widgets/vph_common_widgets.dart';
 import 'helpers/datetime_extension.dart';
 
 const _kSlideTransitionDuration = Duration(milliseconds: 300);
+const _kActionHeight = 36.0;
 
+/// Shows a dialog containing a date picker.
+///
+/// The returned [Future] resolves to the date selected by the user when the
+/// user confirms the dialog. If the user cancels the dialog, null is returned.
+///
+/// When the date picker is first displayed, it will show the month of
+/// [initialDate], with [initialDate] selected.
+///
+/// The [firstDate] is the earliest allowable date. The [lastDate] is the latest
+/// allowable date. [initialDate] must either fall between these dates,
+/// or be equal to one of them
+///
+/// The [width] define the width of date picker dialog
+///
 Future<DateTime?> showWebDatePicker({
   required BuildContext context,
   required DateTime initialDate,
   DateTime? firstDate,
   DateTime? lastDate,
+  double? width,
 }) {
-  //PopupMenuButton
   return showPopupDialog(
     context,
     (context) => _WebDatePicker(
@@ -20,7 +35,8 @@ Future<DateTime?> showWebDatePicker({
       lastDate: lastDate ?? DateTime(100000),
     ),
     asDropDown: true,
-    useTargetWidth: true,
+    useTargetWidth: width != null ? false : true,
+    dialogWidth: width,
   );
 }
 
@@ -70,43 +86,41 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         .toList();
     for (int i = 0; i < kNumberCellsOfMonth; i++) {
       final date = monthDateRange.start.add(Duration(days: i));
-      final isEnabled = (_startDate.month == date.month) &&
-          (date.dateCompareTo(widget.firstDate) >= 0) &&
-          (date.dateCompareTo(widget.lastDate) <= 0);
-      final isSelected = date.dateCompareTo(_selectedDate) == 0;
-      final isNow = date.dateCompareTo(now) == 0;
-      final color = isEnabled
-          ? theme.colorScheme.primary
-          : theme.colorScheme.primary.withOpacity(0.5);
-      Widget child = Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: isSelected ? color : null,
-          border: isNow && !isSelected ? Border.all(color: color) : null,
-        ),
-        child: Text(
-          date.day.toString(),
-          style: isSelected
-              ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
-              : isEnabled
-                  ? textStyle
-                  : textStyle?.copyWith(color: theme.disabledColor),
-        ),
-      );
-      if (isEnabled) {
-        child = InkWell(
-          onTap: () => setState(() => _selectedDate = date),
-          customBorder: const CircleBorder(),
-          child: child,
+      if (_startDate.month == date.month) {
+        final isEnabled = (date.dateCompareTo(widget.firstDate) >= 0) &&
+            (date.dateCompareTo(widget.lastDate) <= 0);
+        final isSelected = date.dateCompareTo(_selectedDate) == 0;
+        final isNow = date.dateCompareTo(now) == 0;
+        final color = isEnabled
+            ? theme.colorScheme.primary
+            : theme.colorScheme.primary.withOpacity(0.5);
+        Widget child = Container(
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isSelected ? color : null,
+            border: isNow && !isSelected ? Border.all(color: color) : null,
+          ),
+          child: Text(
+            date.day.toString(),
+            style: isSelected
+                ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
+                : isEnabled
+                    ? textStyle
+                    : textStyle?.copyWith(color: theme.disabledColor),
+          ),
         );
+        if (isEnabled) {
+          child = InkWell(
+            onTap: () => setState(() => _selectedDate = date),
+            customBorder: const CircleBorder(),
+            child: child,
+          );
+        }
+        children.add(Padding(padding: const EdgeInsets.all(2.0), child: child));
+      } else {
+        children.add(Container());
       }
-      children.add(
-        Padding(
-          padding: const EdgeInsets.all(2.0),
-          child: child,
-        ),
-      );
     }
     return children;
   }
@@ -297,11 +311,19 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    String actionText;
+    Widget navTitle;
     bool isFirst = false, isLast = false, nextView = true;
     switch (_viewMode) {
       case _PickerViewMode.day:
-        actionText = "${kMonthNames[_startDate.month - 1]} ${_startDate.year}";
+        navTitle = Container(
+          height: _kActionHeight,
+          alignment: Alignment.center,
+          child: Text(
+            "${kMonthNames[_startDate.month - 1]} ${_startDate.year}",
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+        );
         final monthDateRange = _startDate.monthDateTimeRange(
             includeTrailingAndLeadingDates: false);
         isFirst = widget.firstDate.dateCompareTo(monthDateRange.start) >= 0;
@@ -309,7 +331,15 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         nextView = widget.lastDate.difference(widget.firstDate).inDays > 28;
         break;
       case _PickerViewMode.month:
-        actionText = _startDate.year.toString();
+        navTitle = Container(
+          height: _kActionHeight,
+          alignment: Alignment.center,
+          child: Text(
+            _startDate.year.toString(),
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+        );
         isFirst = _startDate.year <= widget.firstDate.year;
         isLast = _startDate.year >= widget.lastDate.year;
         nextView = widget.lastDate.year != widget.firstDate.year;
@@ -318,14 +348,30 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         final year = _startDate.year - _startDate.year % 20;
         isFirst = year <= widget.firstDate.year;
         isLast = year + 20 >= widget.lastDate.year;
-        actionText = "$year - ${year + 19}";
+        navTitle = Container(
+          height: _kActionHeight,
+          alignment: Alignment.center,
+          child: Text(
+            "$year - ${year + 19}",
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+        );
         nextView = widget.lastDate.year - widget.firstDate.year > 20;
         break;
       case _PickerViewMode.century:
         final year = _startDate.year - _startDate.year % 200;
         isFirst = year <= widget.firstDate.year;
         isLast = year + 200 >= widget.lastDate.year;
-        actionText = "$year - ${year + 199}";
+        navTitle = Container(
+          height: _kActionHeight,
+          alignment: Alignment.center,
+          child: Text(
+            "$year - ${year + 199}",
+            style: theme.textTheme.bodyLarge
+                ?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
+          ),
+        );
         nextView = false;
         break;
     }
@@ -337,73 +383,32 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            /// Navigation
             Row(
               children: [
                 isFirst
-                    ? Container(
-                        height: 36.0,
-                        width: 36.0,
-                        alignment: Alignment.center,
-                        child: Icon(Icons.keyboard_arrow_left,
-                            color: theme.disabledColor),
-                      )
-                    : InkWell(
-                        onTap: () => _onStartDateChanged(next: false),
-                        customBorder: const CircleBorder(),
-                        child: Container(
-                          height: 36.0,
-                          width: 36.0,
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.keyboard_arrow_left),
-                        ),
-                      ),
-                Expanded(
-                  child: nextView
-                      ? InkWell(
+                    ? _iconWidget(Icons.keyboard_arrow_left,
+                        color: theme.disabledColor)
+                    : _iconWidget(Icons.keyboard_arrow_left,
+                        onTap: () => _onStartDateChanged(next: false)),
+                nextView
+                    ? Expanded(
+                        child: InkWell(
                           onTap: () => _onViewModeChanged(next: true),
                           borderRadius: BorderRadius.circular(4.0),
-                          child: Container(
-                            height: 36.0,
-                            alignment: Alignment.center,
-                            child: Text(
-                              actionText,
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        )
-                      : Container(
-                          height: 36.0,
-                          alignment: Alignment.center,
-                          child: Text(
-                            actionText,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold),
-                          ),
+                          child: navTitle,
                         ),
-                ),
-                isLast
-                    ? Container(
-                        height: 36.0,
-                        width: 36.0,
-                        alignment: Alignment.center,
-                        child: Icon(Icons.keyboard_arrow_right,
-                            color: theme.disabledColor),
                       )
-                    : InkWell(
-                        onTap: () => _onStartDateChanged(next: true),
-                        customBorder: const CircleBorder(),
-                        child: Container(
-                          height: 36.0,
-                          width: 36.0,
-                          alignment: Alignment.center,
-                          child: const Icon(Icons.keyboard_arrow_right),
-                        ),
-                      ),
+                    : Expanded(child: navTitle),
+                isLast
+                    ? _iconWidget(Icons.keyboard_arrow_right,
+                        color: theme.disabledColor)
+                    : _iconWidget(Icons.keyboard_arrow_right,
+                        onTap: () => _onStartDateChanged(next: true)),
               ],
             ),
+
+            /// Month view
             ClipRRect(
               child: AnimatedSwitcher(
                 duration: _kSlideTransitionDuration,
@@ -429,52 +434,61 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 child: _buildChild(theme),
               ),
             ),
+
+            /// Actions
             Row(
               children: [
-                InkWell(
-                  onTap: _onResetState,
-                  customBorder: const CircleBorder(),
-                  child: Container(
-                    height: 36.0,
-                    width: 36.0,
-                    alignment: Alignment.center,
-                    child: const Tooltip(
-                        message: "Reset", child: Icon(Icons.restart_alt)),
-                  ),
-                ),
+                /// Reset
+                _iconWidget(Icons.restart_alt,
+                    tooltip: "Reset", onTap: _onResetState),
                 const SizedBox(width: 4.0),
-                InkWell(
-                  onTap: _onStartDateChanged,
-                  customBorder: const CircleBorder(),
-                  child: Container(
-                    height: 36.0,
-                    width: 36.0,
-                    alignment: Alignment.center,
-                    child: const Tooltip(
-                        message: "Today", child: Icon(Icons.today)),
-                  ),
-                ),
+
+                /// Today
+                _iconWidget(Icons.today,
+                    tooltip: "Today", onTap: _onStartDateChanged),
                 const Spacer(),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.secondary),
+
+                /// CANCEL
+                TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text("CANCEL",
-                      style: TextStyle(color: theme.colorScheme.onSecondary)),
+                  child: const Text("CANCEL"),
                 ),
+
+                /// OK
                 if (_viewMode == _PickerViewMode.day) ...[
-                  const SizedBox(width: 8.0),
-                  ElevatedButton(
+                  const SizedBox(width: 4.0),
+                  TextButton(
                     onPressed: () => Navigator.of(context).pop(_selectedDate),
                     child: const Text("OK"),
                   ),
-                ]
+                ],
               ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _iconWidget(IconData icon,
+      {Color? color, String? tooltip, GestureTapCallback? onTap}) {
+    final child = Container(
+      height: _kActionHeight,
+      width: _kActionHeight,
+      alignment: Alignment.center,
+      child: tooltip != null
+          ? Tooltip(message: tooltip, child: Icon(icon, color: color))
+          : Icon(icon, color: color),
+    );
+    if (onTap != null) {
+      return InkWell(
+        onTap: onTap,
+        customBorder: const CircleBorder(),
+        child: child,
+      );
+    } else {
+      return child;
+    }
   }
 
   void _onStartDateChanged({bool? next}) {

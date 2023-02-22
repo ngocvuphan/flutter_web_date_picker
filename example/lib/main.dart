@@ -22,7 +22,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _selectedDate = DateTime.now();
-    _controller = TextEditingController(text: _selectedDate.toString());
+    _controller =
+        TextEditingController(text: _selectedDate.toString().split(' ')[0]);
   }
 
   @override
@@ -30,28 +31,33 @@ class _MyAppState extends State<MyApp> {
     final textFieldKey = GlobalKey();
     return MaterialApp(
       title: 'Web Date Picker Demo',
-      theme: ThemeData(/* useMaterial3: true, */ colorScheme: lightColorScheme),
-      darkTheme:
-          ThemeData(/* useMaterial3: true, */ colorScheme: darkColorScheme),
+      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       home: Scaffold(
-        body: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360.0),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 32.0),
+          child: SizedBox(
+            width: 150,
             child: TextField(
               key: textFieldKey,
               controller: _controller,
+              readOnly: true,
+              decoration: const InputDecoration(
+                labelText: "yyyy-MM-dd",
+                border: OutlineInputBorder(),
+                suffixIcon: Icon(Icons.today),
+              ),
               onTap: () async {
                 final pickedDate = await showWebDatePicker(
                   context: textFieldKey.currentContext!,
                   initialDate: _selectedDate,
                   firstDate: DateTime.now().add(const Duration(days: 1)),
                   lastDate: DateTime.now().add(const Duration(days: 14000)),
+                  width: 300,
                 );
                 if (pickedDate != null) {
                   _selectedDate = pickedDate;
-                  _controller.text = pickedDate.toString();
+                  _controller.text = pickedDate.toString().split(' ')[0];
                 }
               },
             ),

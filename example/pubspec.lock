@@ -188,17 +188,17 @@ packages:
     dependency: transitive
     description:
       name: vph_common_widgets
-      sha256: e95d262ab0f43d81ff68689cb183ee136b926f0edc695312322732bd02e9ee83
+      sha256: "5b4994af8f147e506408246b5d58a92baf368c4e05dff96f592b4d907205c6ca"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.1"
+    version: "0.0.2"
   vph_web_date_picker:
     dependency: "direct main"
     description:
       path: ".."
       relative: true
     source: path
-    version: "0.0.3"
+    version: "0.0.4"
 sdks:
   dart: ">=2.19.2 <3.0.0"
   flutter: ">=1.17.0"

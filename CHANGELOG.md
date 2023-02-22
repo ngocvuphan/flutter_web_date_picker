@@ -1,3 +1,6 @@
+# [0.0.4] (2/21/2023)
+Document
+
 # [0.0.3] (2/21/2023)
 Add enabled date range
 
