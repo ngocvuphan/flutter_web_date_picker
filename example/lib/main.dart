@@ -37,23 +37,20 @@ class _MyAppState extends State<MyApp> {
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 32.0),
           child: SizedBox(
-            width: 150,
+            width: 300,
             child: TextField(
               key: textFieldKey,
               controller: _controller,
               readOnly: true,
-              decoration: const InputDecoration(
-                labelText: "yyyy-MM-dd",
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.today),
-              ),
               onTap: () async {
                 final pickedDate = await showWebDatePicker(
                   context: textFieldKey.currentContext!,
                   initialDate: _selectedDate,
-                  firstDate: DateTime.now().add(const Duration(days: 1)),
+                  firstDate: DateTime.now().subtract(const Duration(days: 7)),
                   lastDate: DateTime.now().add(const Duration(days: 14000)),
-                  width: 300,
+                  //width: 300,
+                  //withoutActionButtons: true,
+                  weekendDaysColor: Colors.red,
                 );
                 if (pickedDate != null) {
                   _selectedDate = pickedDate;

@@ -26,6 +26,8 @@ Future<DateTime?> showWebDatePicker({
   DateTime? firstDate,
   DateTime? lastDate,
   double? width,
+  bool? withoutActionButtons,
+  Color? weekendDaysColor,
 }) {
   return showPopupDialog(
     context,
@@ -33,6 +35,8 @@ Future<DateTime?> showWebDatePicker({
       initialDate: initialDate,
       firstDate: firstDate ?? DateTime(0),
       lastDate: lastDate ?? DateTime(100000),
+      withoutActionButtons: withoutActionButtons ?? false,
+      weekendDaysColor: weekendDaysColor,
     ),
     asDropDown: true,
     useTargetWidth: width != null ? false : true,
@@ -45,11 +49,15 @@ class _WebDatePicker extends StatefulWidget {
     required this.initialDate,
     required this.firstDate,
     required this.lastDate,
+    required this.withoutActionButtons,
+    this.weekendDaysColor,
   });
 
   final DateTime initialDate;
   final DateTime firstDate;
   final DateTime lastDate;
+  final bool withoutActionButtons;
+  final Color? weekendDaysColor;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -76,11 +84,18 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final monthDateRange =
         _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: true);
     final children = kWeekdayAbbreviations
+        .asMap()
+        .entries
         .map<Widget>(
           (e) => Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(e, style: textStyle),
+            child: Text(e.value,
+                style: e.key == 0 || e.key == (kWeekdayAbbreviations.length - 1)
+                    ? widget.weekendDaysColor != null
+                        ? textStyle?.copyWith(color: widget.weekendDaysColor)
+                        : textStyle
+                    : textStyle),
           ),
         )
         .toList();
@@ -91,9 +106,21 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             (date.dateCompareTo(widget.lastDate) <= 0);
         final isSelected = date.dateCompareTo(_selectedDate) == 0;
         final isNow = date.dateCompareTo(now) == 0;
+        final isWeekend = date.weekday == DateTime.saturday ||
+            date.weekday == DateTime.sunday;
         final color = isEnabled
             ? theme.colorScheme.primary
             : theme.colorScheme.primary.withOpacity(0.5);
+        final cellTextStyle = isSelected
+            ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
+            : isEnabled
+                ? isWeekend && widget.weekendDaysColor != null
+                    ? textStyle?.copyWith(color: widget.weekendDaysColor)
+                    : textStyle
+                : textStyle?.copyWith(
+                    color: isWeekend && widget.weekendDaysColor != null
+                        ? widget.weekendDaysColor?.withOpacity(0.5)
+                        : theme.disabledColor);
         Widget child = Container(
           alignment: Alignment.center,
           decoration: BoxDecoration(
@@ -101,14 +128,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             color: isSelected ? color : null,
             border: isNow && !isSelected ? Border.all(color: color) : null,
           ),
-          child: Text(
-            date.day.toString(),
-            style: isSelected
-                ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
-                : isEnabled
-                    ? textStyle
-                    : textStyle?.copyWith(color: theme.disabledColor),
-          ),
+          child: Text(date.day.toString(), style: cellTextStyle),
         );
         if (isEnabled) {
           child = InkWell(
@@ -439,13 +459,15 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             Row(
               children: [
                 /// Reset
-                _iconWidget(Icons.restart_alt,
-                    tooltip: "Reset", onTap: _onResetState),
-                const SizedBox(width: 4.0),
+                if (!widget.withoutActionButtons)
+                  _iconWidget(Icons.restart_alt,
+                      tooltip: "Reset", onTap: _onResetState),
+                if (!widget.withoutActionButtons) const SizedBox(width: 4.0),
 
                 /// Today
-                _iconWidget(Icons.today,
-                    tooltip: "Today", onTap: _onStartDateChanged),
+                if (!widget.withoutActionButtons)
+                  _iconWidget(Icons.today,
+                      tooltip: "Today", onTap: _onStartDateChanged),
                 const Spacer(),
 
                 /// CANCEL
