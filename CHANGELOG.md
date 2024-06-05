@@ -1,3 +1,7 @@
+# [0.0.6] (6/5/2024)
+
+Add firstDayOfWeekIndex
+
 # [0.0.5] (1/16/2024)
 
 Document
