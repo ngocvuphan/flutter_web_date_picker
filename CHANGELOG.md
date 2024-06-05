@@ -1,3 +1,7 @@
+# [0.0.7] (6/5/2024)
+
+Add locale support
+
 # [0.0.6] (6/5/2024)
 
 Add firstDayOfWeekIndex

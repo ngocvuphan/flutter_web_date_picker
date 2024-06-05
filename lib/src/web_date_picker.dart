@@ -2,62 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:vph_common_widgets/vph_common_widgets.dart';
 
-import 'helpers/datetime_extension.dart';
-import 'helpers/list_extension.dart';
+import 'helpers/extensions.dart';
 
 const kSlideTransitionDuration = Duration(milliseconds: 300);
 const kActionHeight = 36.0;
 
 const kNumberCellsOfMonth = 42;
-const kNumberOfMonth = 12;
-
-const kWeekdayNames = <String>[
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday"
-];
-const kWeekdayShortNames = <String>[
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat"
-];
-const kWeekdayAbbreviations = <String>["S", "M", "T", "W", "T", "F", "S"];
-const kMonthNames = <String>[
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December"
-];
-const kMonthShortNames = <String>[
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec"
-];
 
 /// Shows a dialog containing a date picker.
 ///
@@ -145,18 +95,20 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       includeTrailingAndLeadingDates: true,
       firstDayOfWeekIndex: widget.firstDayOfWeekIndex,
     );
-    final children = kWeekdayAbbreviations
+
+    final children = LocaleDateSymbols.narrowWeekdays(
+            Localizations.localeOf(context).toString())
         .rotate(widget.firstDayOfWeekIndex)
         .asMap()
         .entries
         .map<Widget>(
       (e) {
-        final day = (e.key + widget.firstDayOfWeekIndex) % 7;
+        final weekday = (e.key + widget.firstDayOfWeekIndex) % 7;
         return Container(
           alignment: Alignment.center,
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Text(e.value,
-              style: day == 0 || day == 6
+              style: weekday == 0 || weekday == 6
                   ? widget.weekendDaysColor != null
                       ? textStyle?.copyWith(color: widget.weekendDaysColor)
                       : textStyle
@@ -215,7 +167,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final borderRadius = BorderRadius.circular(_childSize!.height / 4 - 32);
     final children = <Widget>[];
     final now = DateTime.now();
-    for (int i = 1; i <= kNumberOfMonth; i++) {
+    for (int i = 1; i <= 12; i++) {
       final date = DateTime(_startDate.year, i);
       final isEnabled = (date.monthCompareTo(widget.firstDate) >= 0) &&
           (date.monthCompareTo(widget.lastDate) <= 0);
@@ -224,6 +176,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       final color = isEnabled
           ? theme.colorScheme.primary
           : theme.colorScheme.primary.withOpacity(0.5);
+      final shortMonthNames = LocaleDateSymbols.shortMonths(
+          Localizations.localeOf(context).toString());
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -232,7 +186,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           borderRadius: borderRadius,
         ),
         child: Text(
-          kMonthShortNames[i - 1],
+          shortMonthNames[i - 1],
           style: isSelected
               ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
               : isEnabled
@@ -396,6 +350,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final localizations = MaterialLocalizations.of(context);
     Widget navTitle;
     bool isFirst = false, isLast = false, nextView = true;
     switch (_viewMode) {
@@ -404,7 +359,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           height: kActionHeight,
           alignment: Alignment.center,
           child: Text(
-            "${kMonthNames[_startDate.month - 1]} ${_startDate.year}",
+            localizations.formatMonthYear(_startDate),
             style: theme.textTheme.bodyLarge
                 ?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           ),
@@ -422,7 +377,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           height: kActionHeight,
           alignment: Alignment.center,
           child: Text(
-            _startDate.year.toString(),
+            localizations.formatYear(_startDate),
             style: theme.textTheme.bodyLarge
                 ?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           ),
@@ -528,19 +483,21 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 /// Reset
                 if (!widget.withoutActionButtons)
                   _iconWidget(Icons.restart_alt,
-                      tooltip: "Reset", onTap: _onResetState),
+                      tooltip: localizations.backButtonTooltip,
+                      onTap: _onResetState),
                 if (!widget.withoutActionButtons) const SizedBox(width: 4.0),
 
                 /// Today
                 if (!widget.withoutActionButtons)
                   _iconWidget(Icons.today,
-                      tooltip: "Today", onTap: _onStartDateChanged),
+                      tooltip: localizations.currentDateLabel,
+                      onTap: _onStartDateChanged),
                 const Spacer(),
 
                 /// CANCEL
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("CANCEL"),
+                  child: Text(localizations.cancelButtonLabel),
                 ),
 
                 /// OK
@@ -548,7 +505,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                   const SizedBox(width: 4.0),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(_selectedDate),
-                    child: const Text("OK"),
+                    child: Text(localizations.okButtonLabel),
                   ),
                 ],
               ],

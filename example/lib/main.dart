@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vph_web_date_picker/vph_web_date_picker.dart';
 
 import 'material_theme/color_schemes.g.dart';
@@ -30,6 +31,16 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     final textFieldKey = GlobalKey();
     return MaterialApp(
+      supportedLocales: const [
+        Locale('en'),
+        Locale('vi'),
+        Locale('es'),
+        Locale('it'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+      ],
+      locale: const Locale('vi'),
       title: 'Web Date Picker Demo',
       theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
       darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),

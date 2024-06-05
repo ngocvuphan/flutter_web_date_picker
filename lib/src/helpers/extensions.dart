@@ -1,4 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+extension ListExtension on List {
+  List rotate(int start) {
+    if (isEmpty || start == 0) return this;
+    final i = start % length;
+    return sublist(i)..addAll(sublist(0, i));
+  }
+}
 
 extension DateTimeExtension on DateTime {
   DateTime get nextMonth => DateTime(year, month + 1);
@@ -10,7 +19,7 @@ extension DateTimeExtension on DateTime {
   DateTimeRange monthDateTimeRange({
     bool includeTrailingAndLeadingDates = false,
     int firstDayOfWeekIndex = 0,
-    int numberCellsOfMonth = 7 * 6,
+    int numberCellsOfMonth = 42,
   }) {
     DateTime start = DateTime(year, month);
     if (includeTrailingAndLeadingDates) {
@@ -57,5 +66,15 @@ extension DateTimeExtension on DateTime {
     } else {
       return cmp;
     }
+  }
+}
+
+class LocaleDateSymbols {
+  static List<String> narrowWeekdays(String localeName) {
+    return DateFormat.EEEE(localeName).dateSymbols.NARROWWEEKDAYS;
+  }
+
+  static List<String> shortMonths(String localeName) {
+    return DateFormat.MMMM(localeName).dateSymbols.SHORTMONTHS;
   }
 }
