@@ -24,6 +24,7 @@
                 //width: 300,
                 //withoutActionButtons: true,
                 //weekendDaysColor: Colors.red,
+                //firstDayOfWeekIndex: 1,
             );
             if (pickedDate != null) {
                 _selectedDate = pickedDate;
@@ -55,4 +56,7 @@ The month view action buttons include:
 
 The `withoutActionButtons` is `true`, the action buttons are removed from the month view. Default is `false`
 
-The `weekendDaysColor` define the color of weekend days Saturday and Sunday. Default is `null`
+The `weekendDaysColor` defines the color of weekend days Saturday and Sunday. Default is `null`
+
+The `firstDayOfWeekIndex` defines the first day of the week.
+By default, firstDayOfWeekIndex = 0 indicates that Sunday is considered the first day of the week

@@ -51,6 +51,7 @@ class _MyAppState extends State<MyApp> {
                   //width: 300,
                   //withoutActionButtons: true,
                   weekendDaysColor: Colors.red,
+                  // firstDayOfWeekIndex: 1,
                 );
                 if (pickedDate != null) {
                   _selectedDate = pickedDate;

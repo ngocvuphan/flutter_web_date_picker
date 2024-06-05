@@ -1,57 +1,5 @@
 import 'package:flutter/material.dart';
 
-const kNumberCellsOfMonth = 42;
-const kNumberOfWeekday = 7;
-const kNumberOfMonth = 12;
-
-const kWeekdayNames = <String>[
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday"
-];
-const kWeekdayShortNames = <String>[
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat"
-];
-const kWeekdayAbbreviations = <String>["S", "M", "T", "W", "T", "F", "S"];
-const kMonthNames = <String>[
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December"
-];
-const kMonthShortNames = <String>[
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec"
-];
-
 extension DateTimeExtension on DateTime {
   DateTime get nextMonth => DateTime(year, month + 1);
   DateTime get previousMonth => DateTime(year, month - 1);
@@ -59,14 +7,18 @@ extension DateTimeExtension on DateTime {
   DateTime get nextYear => DateTime(year + 1);
   DateTime get previousYear => DateTime(year - 1);
 
-  DateTimeRange monthDateTimeRange(
-      {bool includeTrailingAndLeadingDates = false}) {
+  DateTimeRange monthDateTimeRange({
+    bool includeTrailingAndLeadingDates = false,
+    int firstDayOfWeekIndex = 0,
+    int numberCellsOfMonth = 7 * 6,
+  }) {
     DateTime start = DateTime(year, month);
     if (includeTrailingAndLeadingDates) {
-      start = start.subtract(Duration(days: start.weekday % kNumberOfWeekday));
+      start = start.subtract(
+          Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
     }
     DateTime end = includeTrailingAndLeadingDates
-        ? start.add(const Duration(days: kNumberCellsOfMonth))
+        ? start.add(Duration(days: numberCellsOfMonth))
         : DateTime(year, month + 1, 0);
     return DateTimeRange(start: start, end: end);
   }

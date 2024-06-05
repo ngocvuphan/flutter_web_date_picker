@@ -1,10 +1,63 @@
 import 'package:flutter/material.dart';
+
 import 'package:vph_common_widgets/vph_common_widgets.dart';
 
 import 'helpers/datetime_extension.dart';
+import 'helpers/list_extension.dart';
 
-const _kSlideTransitionDuration = Duration(milliseconds: 300);
-const _kActionHeight = 36.0;
+const kSlideTransitionDuration = Duration(milliseconds: 300);
+const kActionHeight = 36.0;
+
+const kNumberCellsOfMonth = 42;
+const kNumberOfMonth = 12;
+
+const kWeekdayNames = <String>[
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday"
+];
+const kWeekdayShortNames = <String>[
+  "Sun",
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat"
+];
+const kWeekdayAbbreviations = <String>["S", "M", "T", "W", "T", "F", "S"];
+const kMonthNames = <String>[
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+];
+const kMonthShortNames = <String>[
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec"
+];
 
 /// Shows a dialog containing a date picker.
 ///
@@ -18,7 +71,10 @@ const _kActionHeight = 36.0;
 /// allowable date. [initialDate] must either fall between these dates,
 /// or be equal to one of them
 ///
-/// The [width] define the width of date picker dialog
+/// The [width] defines the width of date picker dialog
+///
+/// The [firstDayOfWeekIndex] defines the first day of the week.
+/// By default, firstDayOfWeekIndex = 0 indicates that Sunday is considered the first day of the week
 ///
 Future<DateTime?> showWebDatePicker({
   required BuildContext context,
@@ -28,6 +84,7 @@ Future<DateTime?> showWebDatePicker({
   double? width,
   bool? withoutActionButtons,
   Color? weekendDaysColor,
+  int? firstDayOfWeekIndex,
 }) {
   return showPopupDialog(
     context,
@@ -37,6 +94,7 @@ Future<DateTime?> showWebDatePicker({
       lastDate: lastDate ?? DateTime(100000),
       withoutActionButtons: withoutActionButtons ?? false,
       weekendDaysColor: weekendDaysColor,
+      firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
     ),
     asDropDown: true,
     useTargetWidth: width != null ? false : true,
@@ -51,6 +109,7 @@ class _WebDatePicker extends StatefulWidget {
     required this.lastDate,
     required this.withoutActionButtons,
     this.weekendDaysColor,
+    required this.firstDayOfWeekIndex,
   });
 
   final DateTime initialDate;
@@ -58,6 +117,7 @@ class _WebDatePicker extends StatefulWidget {
   final DateTime lastDate;
   final bool withoutActionButtons;
   final Color? weekendDaysColor;
+  final int firstDayOfWeekIndex;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -81,24 +141,29 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   List<Widget> _buildDaysOfMonthCells(ThemeData theme) {
     final textStyle = theme.textTheme.bodySmall?.copyWith(color: Colors.black);
     final now = DateTime.now();
-    final monthDateRange =
-        _startDate.monthDateTimeRange(includeTrailingAndLeadingDates: true);
+    final monthDateRange = _startDate.monthDateTimeRange(
+      includeTrailingAndLeadingDates: true,
+      firstDayOfWeekIndex: widget.firstDayOfWeekIndex,
+    );
     final children = kWeekdayAbbreviations
+        .rotate(widget.firstDayOfWeekIndex)
         .asMap()
         .entries
         .map<Widget>(
-          (e) => Container(
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(e.value,
-                style: e.key == 0 || e.key == (kWeekdayAbbreviations.length - 1)
-                    ? widget.weekendDaysColor != null
-                        ? textStyle?.copyWith(color: widget.weekendDaysColor)
-                        : textStyle
-                    : textStyle),
-          ),
-        )
-        .toList();
+      (e) {
+        final day = (e.key + widget.firstDayOfWeekIndex) % 7;
+        return Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(e.value,
+              style: day == 0 || day == 6
+                  ? widget.weekendDaysColor != null
+                      ? textStyle?.copyWith(color: widget.weekendDaysColor)
+                      : textStyle
+                  : textStyle),
+        );
+      },
+    ).toList();
     for (int i = 0; i < kNumberCellsOfMonth; i++) {
       final date = monthDateRange.start.add(Duration(days: i));
       if (_startDate.month == date.month) {
@@ -296,7 +361,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       case _PickerViewMode.day:
         return UniformGrid(
           key: _PickerKey(date: _startDate, viewMode: _viewMode),
-          columnCount: kNumberOfWeekday,
+          columnCount: 7,
           squareCell: true,
           onSizeChanged: _onSizeChanged,
           children: _buildDaysOfMonthCells(theme),
@@ -336,7 +401,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     switch (_viewMode) {
       case _PickerViewMode.day:
         navTitle = Container(
-          height: _kActionHeight,
+          height: kActionHeight,
           alignment: Alignment.center,
           child: Text(
             "${kMonthNames[_startDate.month - 1]} ${_startDate.year}",
@@ -345,14 +410,16 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           ),
         );
         final monthDateRange = _startDate.monthDateTimeRange(
-            includeTrailingAndLeadingDates: false);
+          includeTrailingAndLeadingDates: false,
+          numberCellsOfMonth: kNumberCellsOfMonth,
+        );
         isFirst = widget.firstDate.dateCompareTo(monthDateRange.start) >= 0;
         isLast = widget.lastDate.dateCompareTo(monthDateRange.end) <= 0;
         nextView = widget.lastDate.difference(widget.firstDate).inDays > 28;
         break;
       case _PickerViewMode.month:
         navTitle = Container(
-          height: _kActionHeight,
+          height: kActionHeight,
           alignment: Alignment.center,
           child: Text(
             _startDate.year.toString(),
@@ -369,7 +436,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         isFirst = year <= widget.firstDate.year;
         isLast = year + 20 >= widget.lastDate.year;
         navTitle = Container(
-          height: _kActionHeight,
+          height: kActionHeight,
           alignment: Alignment.center,
           child: Text(
             "$year - ${year + 19}",
@@ -384,7 +451,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         isFirst = year <= widget.firstDate.year;
         isLast = year + 200 >= widget.lastDate.year;
         navTitle = Container(
-          height: _kActionHeight,
+          height: kActionHeight,
           alignment: Alignment.center,
           child: Text(
             "$year - ${year + 199}",
@@ -431,7 +498,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             /// Month view
             ClipRRect(
               child: AnimatedSwitcher(
-                duration: _kSlideTransitionDuration,
+                duration: kSlideTransitionDuration,
                 transitionBuilder: (child, animation) {
                   if (_isViewModeChanged) {
                     return ScaleTransition(
@@ -495,8 +562,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   Widget _iconWidget(IconData icon,
       {Color? color, String? tooltip, GestureTapCallback? onTap}) {
     final child = Container(
-      height: _kActionHeight,
-      width: _kActionHeight,
+      height: kActionHeight,
+      width: kActionHeight,
       alignment: Alignment.center,
       child: tooltip != null
           ? Tooltip(message: tooltip, child: Icon(icon, color: color))
