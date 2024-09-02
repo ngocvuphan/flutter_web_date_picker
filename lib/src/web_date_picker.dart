@@ -34,6 +34,7 @@ Future<DateTime?> showWebDatePicker({
   double? width,
   bool? withoutActionButtons,
   Color? weekendDaysColor,
+  Color? selectedDayColor,
   int? firstDayOfWeekIndex,
 }) {
   return showPopupDialog(
@@ -45,6 +46,7 @@ Future<DateTime?> showWebDatePicker({
       withoutActionButtons: withoutActionButtons ?? false,
       weekendDaysColor: weekendDaysColor,
       firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
+      selectedDayColor: selectedDayColor,
     ),
     asDropDown: true,
     useTargetWidth: width != null ? false : true,
@@ -60,6 +62,7 @@ class _WebDatePicker extends StatefulWidget {
     required this.withoutActionButtons,
     this.weekendDaysColor,
     required this.firstDayOfWeekIndex,
+    this.selectedDayColor,
   });
 
   final DateTime initialDate;
@@ -68,6 +71,7 @@ class _WebDatePicker extends StatefulWidget {
   final bool withoutActionButtons;
   final Color? weekendDaysColor;
   final int firstDayOfWeekIndex;
+  final Color? selectedDayColor;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -126,8 +130,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         final isWeekend = date.weekday == DateTime.saturday ||
             date.weekday == DateTime.sunday;
         final color = isEnabled
-            ? theme.colorScheme.primary
-            : theme.colorScheme.primary.withOpacity(0.5);
+            ? widget.selectedDayColor ?? theme.colorScheme.primary
+            : widget.selectedDayColor?.withOpacity(0.5) ??
+                theme.colorScheme.primary.withOpacity(0.5);
         final cellTextStyle = isSelected
             ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
             : isEnabled
@@ -186,7 +191,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           borderRadius: borderRadius,
         ),
         child: Text(
-          shortMonthNames[i - 1],
+          shortMonthNames[i - 1].capitalize(),
           style: isSelected
               ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
               : isEnabled
@@ -359,7 +364,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           height: kActionHeight,
           alignment: Alignment.center,
           child: Text(
-            localizations.formatMonthYear(_startDate),
+            localizations.formatMonthYear(_startDate).capitalize(),
             style: theme.textTheme.bodyLarge
                 ?.copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           ),

@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
       ],
-      locale: const Locale('vi'),
+      locale: const Locale('it'),
       title: 'Web Date Picker Demo',
       theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
       darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
@@ -55,15 +55,16 @@ class _MyAppState extends State<MyApp> {
               readOnly: true,
               onTap: () async {
                 final pickedDate = await showWebDatePicker(
-                  context: textFieldKey.currentContext!,
-                  initialDate: _selectedDate,
-                  firstDate: DateTime.now().subtract(const Duration(days: 7)),
-                  lastDate: DateTime.now().add(const Duration(days: 14000)),
-                  //width: 300,
-                  //withoutActionButtons: true,
-                  weekendDaysColor: Colors.red,
-                  // firstDayOfWeekIndex: 1,
-                );
+                    context: textFieldKey.currentContext!,
+                    initialDate: _selectedDate,
+                    firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                    lastDate: DateTime.now().add(const Duration(days: 14000)),
+                    //width: 300,
+                    //withoutActionButtons: true,
+                    weekendDaysColor: Colors.red,
+                    selectedDayColor: Colors.brown
+                    // firstDayOfWeekIndex: 1,
+                    );
                 if (pickedDate != null) {
                   _selectedDate = pickedDate;
                   _controller.text = pickedDate.toString().split(' ')[0];
