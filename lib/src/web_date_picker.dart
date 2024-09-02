@@ -35,6 +35,8 @@ Future<DateTime?> showWebDatePicker({
   bool? withoutActionButtons,
   Color? weekendDaysColor,
   Color? selectedDayColor,
+  Color? confirmButtonColor,
+  Color? cancelButtonColor,
   int? firstDayOfWeekIndex,
 }) {
   return showPopupDialog(
@@ -47,6 +49,8 @@ Future<DateTime?> showWebDatePicker({
       weekendDaysColor: weekendDaysColor,
       firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
       selectedDayColor: selectedDayColor,
+      confirmButtonColor: confirmButtonColor,
+      cancelButtonColor: cancelButtonColor,
     ),
     asDropDown: true,
     useTargetWidth: width != null ? false : true,
@@ -55,15 +59,16 @@ Future<DateTime?> showWebDatePicker({
 }
 
 class _WebDatePicker extends StatefulWidget {
-  const _WebDatePicker({
-    required this.initialDate,
-    required this.firstDate,
-    required this.lastDate,
-    required this.withoutActionButtons,
-    this.weekendDaysColor,
-    required this.firstDayOfWeekIndex,
-    this.selectedDayColor,
-  });
+  const _WebDatePicker(
+      {required this.initialDate,
+      required this.firstDate,
+      required this.lastDate,
+      required this.withoutActionButtons,
+      this.weekendDaysColor,
+      required this.firstDayOfWeekIndex,
+      this.selectedDayColor,
+      this.confirmButtonColor,
+      this.cancelButtonColor});
 
   final DateTime initialDate;
   final DateTime firstDate;
@@ -72,6 +77,8 @@ class _WebDatePicker extends StatefulWidget {
   final Color? weekendDaysColor;
   final int firstDayOfWeekIndex;
   final Color? selectedDayColor;
+  final Color? confirmButtonColor;
+  final Color? cancelButtonColor;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -502,7 +509,12 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 /// CANCEL
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(localizations.cancelButtonLabel),
+                  child: Text(
+                    localizations.cancelButtonLabel,
+                    style: TextStyle(
+                        color: widget.cancelButtonColor ??
+                            theme.colorScheme.primary),
+                  ),
                 ),
 
                 /// OK
@@ -510,7 +522,12 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                   const SizedBox(width: 4.0),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(_selectedDate),
-                    child: Text(localizations.okButtonLabel),
+                    child: Text(
+                      localizations.okButtonLabel,
+                      style: TextStyle(
+                          color: widget.confirmButtonColor ??
+                              theme.colorScheme.primary),
+                    ),
                   ),
                 ],
               ],
