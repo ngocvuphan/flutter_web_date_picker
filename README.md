@@ -24,6 +24,7 @@
                 //width: 300,
                 //withoutActionButtons: true,
                 //weekendDaysColor: Colors.red,
+                selectedDayColor: Colors.brown
                 //firstDayOfWeekIndex: 1,
             );
             if (pickedDate != null) {
@@ -60,3 +61,9 @@ The `weekendDaysColor` defines the color of weekend days Saturday and Sunday. De
 
 The `firstDayOfWeekIndex` defines the first day of the week.
 By default, firstDayOfWeekIndex = 0 indicates that Sunday is considered the first day of the week
+
+The `selectedDayColor` defines the color of selected day. Default is `primary` color
+
+The `confirmButtonColor` defines the color of confirm button. Default is `primary` color
+
+The `cancelButtonColor` defines the color of cancel button. Default is `primary` color
