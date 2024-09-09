@@ -1,4 +1,4 @@
-# [0.0.8] (6/5/2024)
+# [0.0.8] (9/9/2024)
 
 Capitalized month first letter
 Added selected day color
