@@ -1,9 +1,13 @@
+# [0.0.9] (9/29/2024)
+
+Added asDialog
+
 # [0.0.8] (9/9/2024)
 
 Capitalized month first letter
 Added selected day color
-added confirm button color
-added cancel button color
+Added confirm button color
+Added cancel button color
 
 # [0.0.7] (6/5/2024)
 

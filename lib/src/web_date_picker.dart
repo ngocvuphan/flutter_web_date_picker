@@ -26,6 +26,8 @@ const kNumberCellsOfMonth = 42;
 /// The [firstDayOfWeekIndex] defines the first day of the week.
 /// By default, firstDayOfWeekIndex = 0 indicates that Sunday is considered the first day of the week
 ///
+/// The [asDialog] argument will show the picker as dialog. By default, the picker is show as dropdown
+///
 Future<DateTime?> showWebDatePicker({
   required BuildContext context,
   required DateTime initialDate,
@@ -38,24 +40,52 @@ Future<DateTime?> showWebDatePicker({
   Color? confirmButtonColor,
   Color? cancelButtonColor,
   int? firstDayOfWeekIndex,
+  bool asDialog = false,
 }) {
-  return showPopupDialog(
-    context,
-    (context) => _WebDatePicker(
-      initialDate: initialDate,
-      firstDate: firstDate ?? DateTime(0),
-      lastDate: lastDate ?? DateTime(100000),
-      withoutActionButtons: withoutActionButtons ?? false,
-      weekendDaysColor: weekendDaysColor,
-      firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
-      selectedDayColor: selectedDayColor,
-      confirmButtonColor: confirmButtonColor,
-      cancelButtonColor: cancelButtonColor,
-    ),
-    asDropDown: true,
-    useTargetWidth: width != null ? false : true,
-    dialogWidth: width,
-  );
+  if (asDialog) {
+    final renderBox = context.findRenderObject()! as RenderBox;
+    return showDialog<DateTime?>(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        backgroundColor: Colors.transparent,
+        content: SingleChildScrollView(
+          child: SizedBox(
+            width: width ?? renderBox.size.width,
+            child: _WebDatePicker(
+              initialDate: initialDate,
+              firstDate: firstDate ?? DateTime(0),
+              lastDate: lastDate ?? DateTime(100000),
+              withoutActionButtons: withoutActionButtons ?? false,
+              weekendDaysColor: weekendDaysColor,
+              firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
+              selectedDayColor: selectedDayColor,
+              confirmButtonColor: confirmButtonColor,
+              cancelButtonColor: cancelButtonColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  } else {
+    return showPopupDialog<DateTime?>(
+      context,
+      (context) => _WebDatePicker(
+        initialDate: initialDate,
+        firstDate: firstDate ?? DateTime(0),
+        lastDate: lastDate ?? DateTime(100000),
+        withoutActionButtons: withoutActionButtons ?? false,
+        weekendDaysColor: weekendDaysColor,
+        firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
+        selectedDayColor: selectedDayColor,
+        confirmButtonColor: confirmButtonColor,
+        cancelButtonColor: cancelButtonColor,
+      ),
+      asDropDown: true,
+      useTargetWidth: width != null ? false : true,
+      dialogWidth: width,
+    );
+  }
 }
 
 class _WebDatePicker extends StatefulWidget {
@@ -436,6 +466,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             /// Navigation
             Row(
