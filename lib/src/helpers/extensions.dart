@@ -21,14 +21,14 @@ extension DateTimeExtension on DateTime {
     int firstDayOfWeekIndex = 0,
     int numberCellsOfMonth = 42,
   }) {
-    DateTime start = DateTime(year, month);
+    DateTime start = DateTime(year, month).toUtc();
     if (includeTrailingAndLeadingDates) {
       start = start.subtract(
           Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
     }
     DateTime end = includeTrailingAndLeadingDates
-        ? start.add(Duration(days: numberCellsOfMonth))
-        : DateTime(year, month + 1, 0);
+        ? start.add(Duration(days: numberCellsOfMonth)).toUtc()
+        : DateTime(year, month + 1, 0).toUtc();
     return DateTimeRange(start: start, end: end);
   }
 

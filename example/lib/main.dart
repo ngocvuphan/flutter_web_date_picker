@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vph_web_date_picker/vph_web_date_picker.dart';
 
-import 'material_theme/color_schemes.g.dart';
+// import 'material_theme/color_schemes.g.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,8 +47,6 @@ class _MyAppState extends State<MyApp> {
       ],
       locale: _locale,
       title: 'Web Date Picker Demo',
-      theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-      darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(32),

@@ -15,21 +15,23 @@
     TextField(
         key: textFieldKey,
         controller: _controller,
+        readOnly: true,
         onTap: () async {
             final pickedDate = await showWebDatePicker(
                 context: textFieldKey.currentContext!,
                 initialDate: _selectedDate,
                 firstDate: DateTime.now().subtract(const Duration(days: 7)),
                 lastDate: DateTime.now().add(const Duration(days: 14000)),
-                //width: 300,
-                //withoutActionButtons: true,
-                //weekendDaysColor: Colors.red,
-                selectedDayColor: Colors.brown
-                //firstDayOfWeekIndex: 1,
+                // width: 400,
+                // withoutActionButtons: true,
+                weekendDaysColor: Colors.red,
+                // selectedDayColor: Colors.brown
+                // firstDayOfWeekIndex: 1,
+                // asDialog: _asDialog,
             );
             if (pickedDate != null) {
                 _selectedDate = pickedDate;
-                _controller.text = pickedDate.toString();
+                _controller.text = pickedDate.toString().split(' ')[0];
             }
         },
     ),

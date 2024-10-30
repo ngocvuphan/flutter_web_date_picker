@@ -1,3 +1,7 @@
+# [0.0.10] (10/30/2024)
+
+FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/6#issue-2614455674
+
 # [0.0.9] (9/29/2024)
 
 Added asDialog

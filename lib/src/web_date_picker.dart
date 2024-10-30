@@ -126,7 +126,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = _startDate = widget.initialDate;
+    _selectedDate = _startDate = widget.initialDate.toUtc();
   }
 
   List<Widget> _buildDaysOfMonthCells(ThemeData theme) {

@@ -1,3 +1,3 @@
-library vph_web_date_picker;
+library;
 
 export 'src/web_date_picker.dart';
