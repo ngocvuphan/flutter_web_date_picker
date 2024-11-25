@@ -17,9 +17,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   late TextEditingController _controller;
-  late DateTime _selectedDate;
+  late DateTimeRange _selectedDateRange;
   Locale? _locale;
   bool _asDialog = false;
+  bool _enableDateRangeSelection = true;
 
   static const _supportedLocales = [
     Locale('en', 'US'),
@@ -31,9 +32,11 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = DateTime.now();
-    _controller =
-        TextEditingController(text: _selectedDate.toString().split(' ')[0]);
+    _selectedDateRange = DateTimeRange(start: DateTime.now(), end: DateTime.now());
+    _controller = TextEditingController(
+        text: _enableDateRangeSelection
+            ? "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}"
+            : _selectedDateRange.start.toString().split(' ')[0]);
     _locale = _supportedLocales[0];
   }
 
@@ -42,16 +45,14 @@ class _MyAppState extends State<MyApp> {
     final textFieldKey = GlobalKey();
     return MaterialApp(
       supportedLocales: _supportedLocales,
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       locale: _locale,
       title: 'Web Date Picker Demo',
       home: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(32),
           child: SizedBox(
-            width: 300,
+            width: 400,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -83,16 +84,27 @@ class _MyAppState extends State<MyApp> {
                     const Text("asDialog"),
                   ],
                 ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _enableDateRangeSelection,
+                      onChanged: (v) => setState(() {
+                        _enableDateRangeSelection = v!;
+                      }),
+                    ),
+                    const Text("enableDateRangeSelection"),
+                  ],
+                ),
                 TextField(
                   key: textFieldKey,
                   controller: _controller,
                   readOnly: true,
                   onTap: () async {
-                    final pickedDate = await showWebDatePicker(
+                    final pickedDateRange = await showWebDatePicker(
                       context: textFieldKey.currentContext!,
-                      initialDate: _selectedDate,
-                      firstDate:
-                          DateTime.now().subtract(const Duration(days: 7)),
+                      initialDate: _selectedDateRange.start,
+                      initialDate2: _selectedDateRange.end,
+                      firstDate: DateTime.now().subtract(const Duration(days: 7)),
                       lastDate: DateTime.now().add(const Duration(days: 14000)),
                       // width: 400,
                       // withoutActionButtons: true,
@@ -100,10 +112,15 @@ class _MyAppState extends State<MyApp> {
                       // selectedDayColor: Colors.brown
                       // firstDayOfWeekIndex: 1,
                       asDialog: _asDialog,
+                      enableDateRangeSelection: _enableDateRangeSelection,
                     );
-                    if (pickedDate != null) {
-                      _selectedDate = pickedDate;
-                      _controller.text = pickedDate.toString().split(' ')[0];
+                    if (pickedDateRange != null) {
+                      _selectedDateRange = pickedDateRange;
+                      if (_enableDateRangeSelection) {
+                        _controller.text = "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
+                      } else {
+                        _controller.text = _selectedDateRange.start.toString().split(' ')[0];
+                      }
                     }
                   },
                 ),

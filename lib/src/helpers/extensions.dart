@@ -23,18 +23,15 @@ extension DateTimeExtension on DateTime {
   }) {
     DateTime start = DateTime(year, month).toUtc();
     if (includeTrailingAndLeadingDates) {
-      start = start.subtract(
-          Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
+      start = start.subtract(Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
     }
-    DateTime end = includeTrailingAndLeadingDates
-        ? start.add(Duration(days: numberCellsOfMonth)).toUtc()
-        : DateTime(year, month + 1, 0).toUtc();
+    DateTime end = includeTrailingAndLeadingDates ? start.add(Duration(days: numberCellsOfMonth)).toUtc() : DateTime(year, month + 1, 0).toUtc();
     return DateTimeRange(start: start, end: end);
   }
 
-  bool isInRange(DateTimeRange range) {
-    return difference(range.start).inSeconds >= 0 &&
-        difference(range.end).inSeconds <= 0;
+  bool isInDateRange(DateTime start, DateTime end) {
+    assert(start.dateCompareTo(end) <= 0);
+    return dateCompareTo(start) >= 0 && dateCompareTo(end) <= 0;
   }
 
   int monthCompareTo(DateTime other) {

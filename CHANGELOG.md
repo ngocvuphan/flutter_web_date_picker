@@ -1,3 +1,7 @@
+# [0.1.0] (11/25/2024)
+
+Add enableDateRangeSelection
+
 # [0.0.10] (10/30/2024)
 
 FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/6#issue-2614455674

@@ -17,9 +17,10 @@
         controller: _controller,
         readOnly: true,
         onTap: () async {
-            final pickedDate = await showWebDatePicker(
+            final pickedDateRange = await showWebDatePicker(
                 context: textFieldKey.currentContext!,
-                initialDate: _selectedDate,
+                initialDate: _selectedDateRange.start,
+                initialDate2: _selectedDateRange.end,
                 firstDate: DateTime.now().subtract(const Duration(days: 7)),
                 lastDate: DateTime.now().add(const Duration(days: 14000)),
                 // width: 400,
@@ -27,11 +28,16 @@
                 weekendDaysColor: Colors.red,
                 // selectedDayColor: Colors.brown
                 // firstDayOfWeekIndex: 1,
-                // asDialog: _asDialog,
+                asDialog: _asDialog,
+                enableDateRangeSelection: _enableDateRangeSelection,
             );
-            if (pickedDate != null) {
-                _selectedDate = pickedDate;
-                _controller.text = pickedDate.toString().split(' ')[0];
+            if (pickedDateRange != null) {
+                _selectedDateRange = pickedDateRange;
+                if (_enableDateRangeSelection) {
+                _controller.text = "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
+                } else {
+                _controller.text = _selectedDateRange.start.toString().split(' ')[0];
+                }
             }
         },
     ),
@@ -71,3 +77,5 @@ The `confirmButtonColor` defines the color of confirm button. Default is `primar
 The `cancelButtonColor` defines the color of cancel button. Default is `primary` color
 
 The `asDialog` = `true` will show the picker as dialog. By default, the picker is show as dropdown
+
+The `enableDateRangeSelection` is `true` to enable `DateRange` selection. The `initialDate` corresponds to `DateRange.start` and `initialDate2` corresponds to `DateRange.end`

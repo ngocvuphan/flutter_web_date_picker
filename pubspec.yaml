@@ -1,6 +1,6 @@
 name: vph_web_date_picker
 description: Flutter date picker package for web application. The date picker is displayed as dropdown
-version: 0.0.10
+version: 0.1.0
 homepage: https://github.com/ngocvuphan/flutter_web_date_picker
 
 environment:
@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   intl: ^0.19.0
-  vph_common_widgets: ^0.0.2
+  vph_common_widgets: ^0.0.3
 
 dev_dependencies:
   flutter_test:
