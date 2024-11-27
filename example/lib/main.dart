@@ -32,7 +32,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _selectedDateRange = DateTimeRange(start: DateTime.now(), end: DateTime.now());
+    _selectedDateRange =
+        DateTimeRange(start: DateTime.now(), end: DateTime.now());
     _controller = TextEditingController(
         text: _enableDateRangeSelection
             ? "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}"
@@ -104,7 +105,8 @@ class _MyAppState extends State<MyApp> {
                       context: textFieldKey.currentContext!,
                       initialDate: _selectedDateRange.start,
                       initialDate2: _selectedDateRange.end,
-                      firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 7)),
                       lastDate: DateTime.now().add(const Duration(days: 14000)),
                       // width: 400,
                       // withoutActionButtons: true,
@@ -117,9 +119,11 @@ class _MyAppState extends State<MyApp> {
                     if (pickedDateRange != null) {
                       _selectedDateRange = pickedDateRange;
                       if (_enableDateRangeSelection) {
-                        _controller.text = "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
+                        _controller.text =
+                            "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
                       } else {
-                        _controller.text = _selectedDateRange.start.toString().split(' ')[0];
+                        _controller.text =
+                            _selectedDateRange.start.toString().split(' ')[0];
                       }
                     }
                   },

@@ -23,9 +23,12 @@ extension DateTimeExtension on DateTime {
   }) {
     DateTime start = DateTime(year, month).toUtc();
     if (includeTrailingAndLeadingDates) {
-      start = start.subtract(Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
+      start = start.subtract(
+          Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
     }
-    DateTime end = includeTrailingAndLeadingDates ? start.add(Duration(days: numberCellsOfMonth)).toUtc() : DateTime(year, month + 1, 0).toUtc();
+    DateTime end = includeTrailingAndLeadingDates
+        ? start.add(Duration(days: numberCellsOfMonth)).toUtc()
+        : DateTime(year, month + 1, 0).toUtc();
     return DateTimeRange(start: start, end: end);
   }
 
