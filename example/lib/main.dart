@@ -20,20 +20,21 @@ class _MyAppState extends State<MyApp> {
   late DateTimeRange _selectedDateRange;
   Locale? _locale;
   bool _asDialog = false;
-  bool _enableDateRangeSelection = true;
+  bool _enableDateRangeSelection = false;
 
   static const _supportedLocales = [
     Locale('en', 'US'),
     Locale('vi', 'VN'),
     Locale('es', 'ES'),
     Locale('it', 'IT'),
+    Locale('ar', 'DZ'),
   ];
 
   @override
   void initState() {
     super.initState();
     _selectedDateRange =
-        DateTimeRange(start: DateTime.now(), end: DateTime.now());
+        DateTimeRange(start: DateTime(2024, 12, 10), end: DateTime.now());
     _controller = TextEditingController(
         text: _enableDateRangeSelection
             ? "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}"
@@ -112,6 +113,7 @@ class _MyAppState extends State<MyApp> {
                       // withoutActionButtons: true,
                       weekendDaysColor: Colors.red,
                       // selectedDayColor: Colors.brown
+                      // backgroundColor: Colors.white,
                       // firstDayOfWeekIndex: 1,
                       asDialog: _asDialog,
                       enableDateRangeSelection: _enableDateRangeSelection,

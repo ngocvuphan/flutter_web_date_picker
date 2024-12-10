@@ -26,7 +26,8 @@
                 // width: 400,
                 // withoutActionButtons: true,
                 weekendDaysColor: Colors.red,
-                // selectedDayColor: Colors.brown
+                // selectedDayColor: Colors.brown,
+                // backgroundColor: Colors.white,
                 // firstDayOfWeekIndex: 1,
                 asDialog: _asDialog,
                 enableDateRangeSelection: _enableDateRangeSelection,
@@ -75,6 +76,8 @@ The `selectedDayColor` defines the color of selected day. Default is `primary` c
 The `confirmButtonColor` defines the color of confirm button. Default is `primary` color
 
 The `cancelButtonColor` defines the color of cancel button. Default is `primary` color
+
+The `backgroundColor` defines the picker background color.
 
 The `asDialog` = `true` will show the picker as dialog. By default, the picker is show as dropdown
 

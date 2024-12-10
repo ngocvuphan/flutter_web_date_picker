@@ -40,6 +40,7 @@ Future<DateTimeRange?> showWebDatePicker({
   Color? selectedDayColor,
   Color? confirmButtonColor,
   Color? cancelButtonColor,
+  Color? backgroundColor,
   int? firstDayOfWeekIndex,
   bool asDialog = false,
   bool enableDateRangeSelection = false,
@@ -65,6 +66,7 @@ Future<DateTimeRange?> showWebDatePicker({
               selectedDayColor: selectedDayColor,
               confirmButtonColor: confirmButtonColor,
               cancelButtonColor: cancelButtonColor,
+              backgroundColor: backgroundColor,
               enableDateRangeSelection: enableDateRangeSelection,
             ),
           ),
@@ -85,6 +87,7 @@ Future<DateTimeRange?> showWebDatePicker({
         selectedDayColor: selectedDayColor,
         confirmButtonColor: confirmButtonColor,
         cancelButtonColor: cancelButtonColor,
+        backgroundColor: backgroundColor,
         enableDateRangeSelection: enableDateRangeSelection,
       ),
       asDropDown: true,
@@ -106,6 +109,7 @@ class _WebDatePicker extends StatefulWidget {
     this.selectedDayColor,
     this.confirmButtonColor,
     this.cancelButtonColor,
+    this.backgroundColor,
     this.enableDateRangeSelection = false,
   });
 
@@ -119,6 +123,7 @@ class _WebDatePicker extends StatefulWidget {
   final Color? selectedDayColor;
   final Color? confirmButtonColor;
   final Color? cancelButtonColor;
+  final Color? backgroundColor;
   final bool enableDateRangeSelection;
 
   @override
@@ -141,9 +146,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   @override
   void initState() {
     super.initState();
-    _selectedStartDate = _viewStartDate = widget.initialDate.toUtc();
+    _selectedStartDate = _viewStartDate = DateTime(
+      widget.initialDate.year,
+      widget.initialDate.month,
+      widget.initialDate.day,
+    );
     _selectedEndDate = widget.enableDateRangeSelection
-        ? widget.initialDate2 ?? _selectedStartDate
+        ? DateTime(
+            widget.initialDate2?.year ?? widget.initialDate.year,
+            widget.initialDate2?.month ?? widget.initialDate.month,
+            widget.initialDate2?.day ?? widget.initialDate.month,
+          )
         : _selectedStartDate;
   }
 
@@ -518,6 +531,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final localizations = MaterialLocalizations.of(context);
     Widget navTitle;
     bool isFirst = false, isLast = false, nextView = true;
+    final txtDirection = Directionality.of(context);
     switch (_viewMode) {
       case _PickerViewMode.day:
         navTitle = Container(
@@ -585,6 +599,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 4.0),
       elevation: 1.0,
+      color: widget.backgroundColor,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
@@ -592,27 +607,49 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           children: [
             /// Navigation
             Row(
-              children: [
-                isFirst
-                    ? _iconWidget(Icons.keyboard_arrow_left,
-                        color: theme.disabledColor)
-                    : _iconWidget(Icons.keyboard_arrow_left,
-                        onTap: () => _onStartDateChanged(next: false)),
-                nextView
-                    ? Expanded(
-                        child: InkWell(
-                          onTap: () => _onViewModeChanged(next: true),
-                          borderRadius: BorderRadius.circular(4.0),
-                          child: navTitle,
-                        ),
-                      )
-                    : Expanded(child: navTitle),
-                isLast
-                    ? _iconWidget(Icons.keyboard_arrow_right,
-                        color: theme.disabledColor)
-                    : _iconWidget(Icons.keyboard_arrow_right,
-                        onTap: () => _onStartDateChanged(next: true)),
-              ],
+              children: txtDirection == TextDirection.ltr
+                  ? [
+                      isFirst
+                          ? _iconWidget(Icons.keyboard_arrow_left,
+                              color: theme.disabledColor)
+                          : _iconWidget(Icons.keyboard_arrow_left,
+                              onTap: () => _onStartDateChanged(next: false)),
+                      nextView
+                          ? Expanded(
+                              child: InkWell(
+                                onTap: () => _onViewModeChanged(next: true),
+                                borderRadius: BorderRadius.circular(4.0),
+                                child: navTitle,
+                              ),
+                            )
+                          : Expanded(child: navTitle),
+                      isLast
+                          ? _iconWidget(Icons.keyboard_arrow_right,
+                              color: theme.disabledColor)
+                          : _iconWidget(Icons.keyboard_arrow_right,
+                              onTap: () => _onStartDateChanged(next: true)),
+                    ]
+                  : [
+                      isLast
+                          ? _iconWidget(Icons.keyboard_arrow_right,
+                              color: theme.disabledColor)
+                          : _iconWidget(Icons.keyboard_arrow_right,
+                              onTap: () => _onStartDateChanged(next: true)),
+                      nextView
+                          ? Expanded(
+                              child: InkWell(
+                                onTap: () => _onViewModeChanged(next: true),
+                                borderRadius: BorderRadius.circular(4.0),
+                                child: navTitle,
+                              ),
+                            )
+                          : Expanded(child: navTitle),
+                      isFirst
+                          ? _iconWidget(Icons.keyboard_arrow_left,
+                              color: theme.disabledColor)
+                          : _iconWidget(Icons.keyboard_arrow_left,
+                              onTap: () => _onStartDateChanged(next: false)),
+                    ],
             ),
 
             /// Month view

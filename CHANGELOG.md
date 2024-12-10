@@ -1,10 +1,16 @@
+# [0.1.1] (12/10/2024)
+
+FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/8
+FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/9
+ADD - backgroundColor (https://github.com/ngocvuphan/flutter_web_date_picker/issues/10)
+
 # [0.1.0] (11/25/2024)
 
 Add enableDateRangeSelection
 
 # [0.0.10] (10/30/2024)
 
-FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/6#issue-2614455674
+FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/6
 
 # [0.0.9] (9/29/2024)
 
