@@ -1,3 +1,7 @@
+# [0.1.2] (12/29/2024)
+
+FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/11
+
 # [0.1.1] (12/10/2024)
 
 FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/8

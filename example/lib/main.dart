@@ -54,7 +54,7 @@ class _MyAppState extends State<MyApp> {
         body: Padding(
           padding: const EdgeInsets.all(32),
           child: SizedBox(
-            width: 400,
+            width: 240,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -109,10 +109,10 @@ class _MyAppState extends State<MyApp> {
                       firstDate:
                           DateTime.now().subtract(const Duration(days: 7)),
                       lastDate: DateTime.now().add(const Duration(days: 14000)),
-                      // width: 400,
+                      width: 400,
                       // withoutActionButtons: true,
                       weekendDaysColor: Colors.red,
-                      // selectedDayColor: Colors.brown
+                      selectedDayColor: Colors.brown,
                       // backgroundColor: Colors.white,
                       // firstDayOfWeekIndex: 1,
                       asDialog: _asDialog,

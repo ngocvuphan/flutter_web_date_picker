@@ -352,8 +352,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       final isSelected = date.monthCompareTo(_selectedStartDate) == 0;
       final isNow = date.monthCompareTo(now) == 0;
       final color = isEnabled
-          ? theme.colorScheme.primary
-          : theme.colorScheme.primary.withOpacity(0.5);
+          ? widget.selectedDayColor ?? theme.colorScheme.primary
+          : (widget.selectedDayColor ?? theme.colorScheme.primary)
+              .withOpacity(0.5);
       final shortMonthNames = LocaleDateSymbols.shortMonths(
           Localizations.localeOf(context).toString());
       Widget child = Container(
@@ -402,8 +403,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       final isSelected = date.year == _selectedStartDate.year;
       final isNow = date.year == now.year;
       final color = isEnabled
-          ? theme.colorScheme.primary
-          : theme.colorScheme.primary.withOpacity(0.5);
+          ? widget.selectedDayColor ?? theme.colorScheme.primary
+          : (widget.selectedDayColor ?? theme.colorScheme.primary)
+              .withOpacity(0.5);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -453,8 +455,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           (_selectedStartDate.year - date.year) < 20;
       final isNow = now.year >= date.year && (now.year - date.year) < 20;
       final color = isEnabled
-          ? theme.colorScheme.primary
-          : theme.colorScheme.primary.withOpacity(0.5);
+          ? widget.selectedDayColor ?? theme.colorScheme.primary
+          : (widget.selectedDayColor ?? theme.colorScheme.primary)
+              .withOpacity(0.5);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
