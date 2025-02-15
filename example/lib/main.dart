@@ -33,8 +33,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _selectedDateRange =
-        DateTimeRange(start: DateTime(2024, 12, 10), end: DateTime.now());
+    _selectedDateRange = DateTimeRange(
+        start: DateTime.now().subtract(Duration(days: 5)),
+        end: DateTime.now().add(Duration(days: 5)));
     _controller = TextEditingController(
         text: _enableDateRangeSelection
             ? "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}"
@@ -103,21 +104,22 @@ class _MyAppState extends State<MyApp> {
                   readOnly: true,
                   onTap: () async {
                     final pickedDateRange = await showWebDatePicker(
-                      context: textFieldKey.currentContext!,
-                      initialDate: _selectedDateRange.start,
-                      initialDate2: _selectedDateRange.end,
-                      firstDate:
-                          DateTime.now().subtract(const Duration(days: 7)),
-                      lastDate: DateTime.now().add(const Duration(days: 14000)),
-                      width: 400,
-                      // withoutActionButtons: true,
-                      weekendDaysColor: Colors.red,
-                      selectedDayColor: Colors.brown,
-                      // backgroundColor: Colors.white,
-                      // firstDayOfWeekIndex: 1,
-                      asDialog: _asDialog,
-                      enableDateRangeSelection: _enableDateRangeSelection,
-                    );
+                        context: textFieldKey.currentContext!,
+                        initialDate: _selectedDateRange.start,
+                        initialDate2: _selectedDateRange.end,
+                        firstDate:
+                            DateTime.now().subtract(const Duration(days: 7)),
+                        lastDate:
+                            DateTime.now().add(const Duration(days: 14000)),
+                        width: 400,
+                        // withoutActionButtons: true,
+                        weekendDaysColor: Colors.red,
+                        // selectedDayColor: Colors.brown,
+                        // backgroundColor: Colors.white,
+                        // firstDayOfWeekIndex: 1,
+                        asDialog: _asDialog,
+                        enableDateRangeSelection: _enableDateRangeSelection,
+                        blockedDates: [DateTime.now().add(Duration(days: 2))]);
                     if (pickedDateRange != null) {
                       _selectedDateRange = pickedDateRange;
                       if (_enableDateRangeSelection) {
