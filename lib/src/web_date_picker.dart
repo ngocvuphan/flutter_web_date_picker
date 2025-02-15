@@ -44,6 +44,7 @@ Future<DateTimeRange?> showWebDatePicker({
   int? firstDayOfWeekIndex,
   bool asDialog = false,
   bool enableDateRangeSelection = false,
+  List<DateTime>? blockedDates,
 }) {
   if (asDialog) {
     final renderBox = context.findRenderObject()! as RenderBox;
@@ -68,6 +69,7 @@ Future<DateTimeRange?> showWebDatePicker({
               cancelButtonColor: cancelButtonColor,
               backgroundColor: backgroundColor,
               enableDateRangeSelection: enableDateRangeSelection,
+              blockedDates: blockedDates ?? [],
             ),
           ),
         ),
@@ -89,6 +91,7 @@ Future<DateTimeRange?> showWebDatePicker({
         cancelButtonColor: cancelButtonColor,
         backgroundColor: backgroundColor,
         enableDateRangeSelection: enableDateRangeSelection,
+        blockedDates: blockedDates ?? [],
       ),
       asDropDown: true,
       useTargetWidth: width != null ? false : true,
@@ -103,6 +106,7 @@ class _WebDatePicker extends StatefulWidget {
     this.initialDate2,
     required this.firstDate,
     required this.lastDate,
+    required this.blockedDates,
     this.withoutActionButtons = false,
     this.weekendDaysColor,
     required this.firstDayOfWeekIndex,
@@ -113,6 +117,7 @@ class _WebDatePicker extends StatefulWidget {
     this.enableDateRangeSelection = false,
   });
 
+  final List<DateTime> blockedDates;
   final DateTime initialDate;
   final DateTime? initialDate2;
   final DateTime firstDate;
@@ -193,7 +198,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     for (int i = 0; i < kNumberCellsOfMonth; i++) {
       final date = monthDateRange.start.add(Duration(days: i));
       if (_viewStartDate.month == date.month) {
-        final isEnabled = date.isInDateRange(widget.firstDate, widget.lastDate);
+        final isEnabled =
+            date.isInDateRange(widget.firstDate, widget.lastDate) &&
+                !date.isBlockedDate(widget.blockedDates, date);
         final isSelected =
             date.isInDateRange(_selectedStartDate, _selectedEndDate);
         final isSelectedLeft =

@@ -37,6 +37,13 @@ extension DateTimeExtension on DateTime {
     return dateCompareTo(start) >= 0 && dateCompareTo(end) <= 0;
   }
 
+  bool isBlockedDate(List<DateTime> blockedDates, DateTime currentDate) {
+    return blockedDates.any((date) =>
+        date.year == currentDate.year &&
+        date.month == currentDate.month &&
+        date.day == currentDate.day);
+  }
+
   int monthCompareTo(DateTime other) {
     if (year < other.year) {
       return -1;
