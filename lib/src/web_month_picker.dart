@@ -131,7 +131,7 @@ class _WebMonthPickerState extends State<_WebMonthPicker> {
   @override
   void initState() {
     super.initState();
-    _childSize = Size(300, 300);
+    _childSize = Size(250, 300);
     _selectedStartDate = _viewStartDate = DateTime(
       widget.initialDate.year,
       widget.initialDate.month,

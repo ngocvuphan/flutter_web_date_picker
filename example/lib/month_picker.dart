@@ -21,7 +21,7 @@ class _MonthPickerState extends State<MonthPicker> {
       onTap: () async {
         final pickedDateRange = await showWebMonthPicker(
           context: context,
-          initialDate: DateTime.now(),
+          initialDate: _selectedDateRange ?? DateTime.now(),
           withoutActionButtons: true,
           width: 300,
           weekendDaysColor: Colors.red,
