@@ -1,3 +1,11 @@
+# [0.1.4] (7/31/2025)
+
+Added month and year picker as showWebMonthPicker by [hajul-dhanish](https://github.com/hajul-dhanish)
+
+# [0.1.3] (2/15/2025)
+
+Add support for disabling specific dates in the date picker by [hajul-dhanish](https://github.com/hajul-dhanish)
+
 # [0.1.2] (12/29/2024)
 
 FIX - https://github.com/ngocvuphan/flutter_web_date_picker/issues/11

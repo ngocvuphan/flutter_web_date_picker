@@ -31,6 +31,7 @@
                 // firstDayOfWeekIndex: 1,
                 asDialog: _asDialog,
                 enableDateRangeSelection: _enableDateRangeSelection,
+                // blockedDates: []
             );
             if (pickedDateRange != null) {
                 _selectedDateRange = pickedDateRange;
