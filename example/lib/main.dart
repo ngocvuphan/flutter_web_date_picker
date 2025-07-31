@@ -1,3 +1,4 @@
+import 'package:example/month_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vph_web_date_picker/vph_web_date_picker.dart';
@@ -130,6 +131,8 @@ class _MyAppState extends State<MyApp> {
                     }
                   },
                 ),
+                //Month Picker
+                MonthPicker(),
               ],
             ),
           ),
