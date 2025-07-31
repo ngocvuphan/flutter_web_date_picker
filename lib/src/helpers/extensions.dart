@@ -9,6 +9,8 @@ extension ListExtension on List {
   }
 }
 
+enum DateTimeCompareMode { day, month, year }
+
 extension DateTimeExtension on DateTime {
   DateTime get nextMonth => DateTime(year, month + 1);
   DateTime get previousMonth => DateTime(year, month - 1);
@@ -33,8 +35,9 @@ extension DateTimeExtension on DateTime {
   }
 
   bool isInDateRange(DateTime start, DateTime end) {
-    assert(start.dateCompareTo(end) <= 0);
-    return dateCompareTo(start) >= 0 && dateCompareTo(end) <= 0;
+    assert(start.compareToEx(end, DateTimeCompareMode.day) <= 0);
+    return compareToEx(start, DateTimeCompareMode.day) >= 0 &&
+        compareToEx(end, DateTimeCompareMode.day) <= 0;
   }
 
   bool isBlockedDate(List<DateTime> blockedDates, DateTime currentDate) {
@@ -44,35 +47,16 @@ extension DateTimeExtension on DateTime {
         date.day == currentDate.day);
   }
 
-  int monthCompareTo(DateTime other) {
-    if (year < other.year) {
-      return -1;
-    } else if (year > other.year) {
-      return 1;
-    } else {
-      if (month < other.month) {
-        return -1;
-      } else if (month > other.month) {
-        return 1;
-      } else {
-        return 0;
-      }
+  int compareToEx(DateTime other, DateTimeCompareMode mode) {
+    final year_cmp = year.compareTo(other.year);
+    if (mode == DateTimeCompareMode.year || year_cmp != 0) {
+      return year_cmp;
     }
-  }
-
-  int dateCompareTo(DateTime other) {
-    final cmp = monthCompareTo(other);
-    if (cmp == 0) {
-      if (day < other.day) {
-        return -1;
-      } else if (day > other.day) {
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      return cmp;
+    final month_cmp = month.compareTo(other.month);
+    if (mode == DateTimeCompareMode.month || month_cmp != 0) {
+      return month_cmp;
     }
+    return day.compareTo(other.day);
   }
 }
 

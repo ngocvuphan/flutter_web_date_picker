@@ -1,3 +1,9 @@
+# [0.1.5] (7/31/2025)
+
+RENAME - `enableDateRangeSelection` to `enableRangeSelection`
+ADD - `initViewMode` option to set initial view (e.g., month picker, year picker)
+ADD - `initSize` option to set initial size
+
 # [0.1.4] (7/31/2025)
 
 Added month and year picker as showWebMonthPicker by [hajul-dhanish](https://github.com/hajul-dhanish)

@@ -43,8 +43,10 @@ Future<DateTimeRange?> showWebDatePicker({
   Color? backgroundColor,
   int? firstDayOfWeekIndex,
   bool asDialog = false,
-  bool enableDateRangeSelection = false,
+  bool enableRangeSelection = false,
   List<DateTime>? blockedDates,
+  PickerViewMode initViewMode = PickerViewMode.day,
+  Size? initSize,
 }) {
   if (asDialog) {
     final renderBox = context.findRenderObject()! as RenderBox;
@@ -68,8 +70,10 @@ Future<DateTimeRange?> showWebDatePicker({
               confirmButtonColor: confirmButtonColor,
               cancelButtonColor: cancelButtonColor,
               backgroundColor: backgroundColor,
-              enableDateRangeSelection: enableDateRangeSelection,
+              enableRangeSelection: enableRangeSelection,
               blockedDates: blockedDates ?? [],
+              initViewMode: initViewMode,
+              initSize: initSize,
             ),
           ),
         ),
@@ -90,8 +94,10 @@ Future<DateTimeRange?> showWebDatePicker({
         confirmButtonColor: confirmButtonColor,
         cancelButtonColor: cancelButtonColor,
         backgroundColor: backgroundColor,
-        enableDateRangeSelection: enableDateRangeSelection,
+        enableRangeSelection: enableRangeSelection,
         blockedDates: blockedDates ?? [],
+        initViewMode: initViewMode,
+        initSize: initSize,
       ),
       asDropDown: true,
       useTargetWidth: width != null ? false : true,
@@ -114,7 +120,9 @@ class _WebDatePicker extends StatefulWidget {
     this.confirmButtonColor,
     this.cancelButtonColor,
     this.backgroundColor,
-    this.enableDateRangeSelection = false,
+    this.enableRangeSelection = false,
+    this.initViewMode = PickerViewMode.day,
+    this.initSize,
   });
 
   final List<DateTime> blockedDates;
@@ -129,7 +137,9 @@ class _WebDatePicker extends StatefulWidget {
   final Color? confirmButtonColor;
   final Color? cancelButtonColor;
   final Color? backgroundColor;
-  final bool enableDateRangeSelection;
+  final bool enableRangeSelection;
+  final PickerViewMode initViewMode;
+  final Size? initSize;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -144,19 +154,24 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   DateTime? _hoveredEndDate;
 
   double _slideDirection = 1.0;
-  _PickerViewMode _viewMode = _PickerViewMode.day;
+  late PickerViewMode _curViewMode;
   bool _isViewModeChanged = false;
   Size? _childSize;
 
   @override
   void initState() {
     super.initState();
+    _curViewMode = widget.initViewMode;
+    _childSize = widget.initSize;
+    if (_childSize == null && _curViewMode != PickerViewMode.day) {
+      _childSize = Size(370, 350);
+    }
     _selectedStartDate = _viewStartDate = DateTime(
       widget.initialDate.year,
       widget.initialDate.month,
       widget.initialDate.day,
     );
-    _selectedEndDate = widget.enableDateRangeSelection
+    _selectedEndDate = widget.enableRangeSelection
         ? DateTime(
             widget.initialDate2?.year ?? widget.initialDate.year,
             widget.initialDate2?.month ?? widget.initialDate.month,
@@ -203,17 +218,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 !date.isBlockedDate(widget.blockedDates, date);
         final isSelected =
             date.isInDateRange(_selectedStartDate, _selectedEndDate);
-        final isSelectedLeft =
-            isSelected && date.dateCompareTo(_selectedStartDate) == 0;
-        final isSelectedRight =
-            isSelected && date.dateCompareTo(_selectedEndDate) == 0;
-        final isNow = date.dateCompareTo(now) == 0;
+        final isSelectedLeft = isSelected &&
+            date.compareToEx(_selectedStartDate, DateTimeCompareMode.day) == 0;
+        final isSelectedRight = isSelected &&
+            date.compareToEx(_selectedEndDate, DateTimeCompareMode.day) == 0;
+        final isNow = date.compareToEx(now, DateTimeCompareMode.day) == 0;
         final isWeekend = date.weekday == DateTime.saturday ||
             date.weekday == DateTime.sunday;
         final color = isEnabled
             ? widget.selectedDayColor ?? theme.colorScheme.primary
-            : widget.selectedDayColor?.withOpacity(0.5) ??
-                theme.colorScheme.primary.withOpacity(0.5);
+            : widget.selectedDayColor?.withAlpha(128) ??
+                theme.colorScheme.primary.withAlpha(128);
         final cellTextStyle = isSelected
             ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
             : isEnabled
@@ -222,17 +237,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                     : textStyle
                 : textStyle?.copyWith(
                     color: isWeekend && widget.weekendDaysColor != null
-                        ? widget.weekendDaysColor?.withOpacity(0.5)
+                        ? widget.weekendDaysColor?.withAlpha(128)
                         : theme.disabledColor);
 
-        final isHovered = widget.enableDateRangeSelection &&
+        final isHovered = widget.enableRangeSelection &&
             _hoveredStartDate != null &&
             _hoveredEndDate != null &&
             date.isInDateRange(_hoveredStartDate!, _hoveredEndDate!);
-        final isHoveredLeft =
-            isHovered && date.dateCompareTo(_hoveredStartDate!) == 0;
-        final isHoveredRight =
-            isHovered && date.dateCompareTo(_hoveredEndDate!) == 0;
+        final isHoveredLeft = isHovered &&
+            date.compareToEx(_hoveredStartDate!, DateTimeCompareMode.day) == 0;
+        final isHoveredRight = isHovered &&
+            date.compareToEx(_hoveredEndDate!, DateTimeCompareMode.day) == 0;
         Widget child = Container(
           alignment: Alignment.center,
           margin: EdgeInsets.all(2.0),
@@ -246,13 +261,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         if (isEnabled) {
           child = InkWell(
             onTap: () {
-              if (widget.enableDateRangeSelection) {
-                if (_selectedStartDate.dateCompareTo(_selectedEndDate) < 0) {
+              if (widget.enableRangeSelection) {
+                if (_selectedStartDate.compareToEx(
+                        _selectedEndDate, DateTimeCompareMode.day) <
+                    0) {
                   setState(() {
                     _selectedStartDate = _selectedEndDate = date;
                     _hoveredStartDate = _hoveredEndDate = null;
                   });
-                } else if (date.dateCompareTo(_selectedStartDate) <= 0) {
+                } else if (date.compareToEx(
+                        _selectedStartDate, DateTimeCompareMode.day) <=
+                    0) {
                   setState(() {
                     _selectedStartDate = date;
                     _hoveredStartDate = _hoveredEndDate = null;
@@ -268,11 +287,15 @@ class _WebDatePickerState extends State<_WebDatePicker> {
               }
             },
             onHover: (hovering) {
-              if (widget.enableDateRangeSelection) {
+              if (widget.enableRangeSelection) {
                 if (hovering) {
-                  if (_selectedStartDate.dateCompareTo(_selectedEndDate) < 0) {
+                  if (_selectedStartDate.compareToEx(
+                          _selectedEndDate, DateTimeCompareMode.day) <
+                      0) {
                     setState(() => _hoveredStartDate = _hoveredEndDate = date);
-                  } else if (date.dateCompareTo(_selectedStartDate) <= 0) {
+                  } else if (date.compareToEx(
+                          _selectedStartDate, DateTimeCompareMode.day) <=
+                      0) {
                     setState(() {
                       _hoveredStartDate = date;
                       _hoveredEndDate = _selectedEndDate;
@@ -292,7 +315,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             child: child,
           );
         }
-        if (widget.enableDateRangeSelection) {
+        if (widget.enableRangeSelection) {
           final dfBorderSide =
               BorderSide(color: color, width: 1.0, style: BorderStyle.solid);
           final dfRadius = Radius.circular(_childSize?.height ?? 100);
@@ -354,14 +377,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final now = DateTime.now();
     for (int i = 1; i <= 12; i++) {
       final date = DateTime(_viewStartDate.year, i);
-      final isEnabled = (date.monthCompareTo(widget.firstDate) >= 0) &&
-          (date.monthCompareTo(widget.lastDate) <= 0);
-      final isSelected = date.monthCompareTo(_selectedStartDate) == 0;
-      final isNow = date.monthCompareTo(now) == 0;
+      final isEnabled = (date.compareToEx(
+                  widget.firstDate, DateTimeCompareMode.month) >=
+              0) &&
+          (date.compareToEx(widget.lastDate, DateTimeCompareMode.month) <= 0);
+      final isSelected =
+          date.compareToEx(_selectedStartDate, DateTimeCompareMode.month) == 0;
+      final isNow = date.compareToEx(now, DateTimeCompareMode.month) == 0;
       final color = isEnabled
           ? widget.selectedDayColor ?? theme.colorScheme.primary
           : (widget.selectedDayColor ?? theme.colorScheme.primary)
-              .withOpacity(0.5);
+              .withAlpha(128);
       final shortMonthNames = LocaleDateSymbols.shortMonths(
           Localizations.localeOf(context).toString());
       Widget child = Container(
@@ -382,7 +408,13 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       );
       if (isEnabled) {
         child = InkWell(
-          onTap: () => _onViewModeChanged(next: false, date: date),
+          onTap: () {
+            if (widget.initViewMode == PickerViewMode.month) {
+              setState(() => _selectedStartDate = _selectedEndDate = date);
+            } else {
+              _onViewModeChanged(next: false, date: date);
+            }
+          },
           borderRadius: borderRadius,
           child: child,
         );
@@ -412,7 +444,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       final color = isEnabled
           ? widget.selectedDayColor ?? theme.colorScheme.primary
           : (widget.selectedDayColor ?? theme.colorScheme.primary)
-              .withOpacity(0.5);
+              .withAlpha(128);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -431,7 +463,13 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       );
       if (isEnabled) {
         child = InkWell(
-          onTap: () => _onViewModeChanged(next: false, date: date),
+          onTap: () {
+            if (widget.initViewMode == PickerViewMode.year) {
+              setState(() => _selectedStartDate = _selectedEndDate = date);
+            } else {
+              _onViewModeChanged(next: false, date: date);
+            }
+          },
           borderRadius: borderRadius,
           child: child,
         );
@@ -464,7 +502,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       final color = isEnabled
           ? widget.selectedDayColor ?? theme.colorScheme.primary
           : (widget.selectedDayColor ?? theme.colorScheme.primary)
-              .withOpacity(0.5);
+              .withAlpha(128);
       Widget child = Container(
         alignment: Alignment.center,
         decoration: BoxDecoration(
@@ -483,7 +521,16 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       );
       if (isEnabled) {
         child = InkWell(
-          onTap: () => _onViewModeChanged(next: false, date: date),
+          onTap: () {
+            if (widget.initViewMode == PickerViewMode.century) {
+              setState(() {
+                _selectedStartDate = date;
+                _selectedEndDate = DateTime(date.year + 19);
+              });
+            } else {
+              _onViewModeChanged(next: false, date: date);
+            }
+          },
           borderRadius: borderRadius,
           child: child,
         );
@@ -499,34 +546,34 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   }
 
   Widget _buildChild(ThemeData theme) {
-    switch (_viewMode) {
-      case _PickerViewMode.day:
+    switch (_curViewMode) {
+      case PickerViewMode.day:
         return UniformGrid(
-          key: _PickerKey(date: _viewStartDate, viewMode: _viewMode),
+          key: _PickerKey(date: _viewStartDate, viewMode: _curViewMode),
           columnCount: 7,
           squareCell: true,
           onSizeChanged: _onSizeChanged,
           children: _buildDaysOfMonthCells(theme),
         );
-      case _PickerViewMode.month:
+      case PickerViewMode.month:
         return UniformGrid(
-          key: _PickerKey(date: _viewStartDate, viewMode: _viewMode),
+          key: _PickerKey(date: _viewStartDate, viewMode: _curViewMode),
           columnCount: 3,
           withHeader: false,
           fixedSize: _childSize,
           children: _buildMonthsOfYearCells(theme),
         );
-      case _PickerViewMode.year:
+      case PickerViewMode.year:
         return UniformGrid(
-          key: _PickerKey(date: _viewStartDate, viewMode: _viewMode),
+          key: _PickerKey(date: _viewStartDate, viewMode: _curViewMode),
           columnCount: 4,
           withHeader: false,
           fixedSize: _childSize,
           children: _buildYearsCells(theme),
         );
-      case _PickerViewMode.century:
+      case PickerViewMode.century:
         return UniformGrid(
-          key: _PickerKey(date: _viewStartDate, viewMode: _viewMode),
+          key: _PickerKey(date: _viewStartDate, viewMode: _curViewMode),
           columnCount: 2,
           withHeader: false,
           fixedSize: _childSize,
@@ -542,8 +589,8 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     Widget navTitle;
     bool isFirst = false, isLast = false, nextView = true;
     final txtDirection = Directionality.of(context);
-    switch (_viewMode) {
-      case _PickerViewMode.day:
+    switch (_curViewMode) {
+      case PickerViewMode.day:
         navTitle = Container(
           height: kActionHeight,
           alignment: Alignment.center,
@@ -557,11 +604,15 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           includeTrailingAndLeadingDates: false,
           numberCellsOfMonth: kNumberCellsOfMonth,
         );
-        isFirst = widget.firstDate.dateCompareTo(monthDateRange.start) >= 0;
-        isLast = widget.lastDate.dateCompareTo(monthDateRange.end) <= 0;
+        isFirst = widget.firstDate
+                .compareToEx(monthDateRange.start, DateTimeCompareMode.day) >=
+            0;
+        isLast = widget.lastDate
+                .compareToEx(monthDateRange.end, DateTimeCompareMode.day) <=
+            0;
         nextView = widget.lastDate.difference(widget.firstDate).inDays > 28;
         break;
-      case _PickerViewMode.month:
+      case PickerViewMode.month:
         navTitle = Container(
           height: kActionHeight,
           alignment: Alignment.center,
@@ -575,7 +626,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         isLast = _viewStartDate.year >= widget.lastDate.year;
         nextView = widget.lastDate.year != widget.firstDate.year;
         break;
-      case _PickerViewMode.year:
+      case PickerViewMode.year:
         final year = _viewStartDate.year - _viewStartDate.year % 20;
         isFirst = year <= widget.firstDate.year;
         isLast = year + 20 >= widget.lastDate.year;
@@ -590,7 +641,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         );
         nextView = widget.lastDate.year - widget.firstDate.year > 20;
         break;
-      case _PickerViewMode.century:
+      case PickerViewMode.century:
         final year = _viewStartDate.year - _viewStartDate.year % 200;
         isFirst = year <= widget.firstDate.year;
         isLast = year + 200 >= widget.lastDate.year;
@@ -718,7 +769,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 ),
 
                 /// OK
-                if (_viewMode == _PickerViewMode.day) ...[
+                if (_curViewMode == widget.initViewMode) ...[
                   const SizedBox(width: 4.0),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(DateTimeRange(
@@ -763,18 +814,18 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   void _onStartDateChanged({bool? next}) {
     DateTime date;
     if (next != null) {
-      switch (_viewMode) {
-        case _PickerViewMode.day:
+      switch (_curViewMode) {
+        case PickerViewMode.day:
           date = next ? _viewStartDate.nextMonth : _viewStartDate.previousMonth;
           break;
-        case _PickerViewMode.month:
+        case PickerViewMode.month:
           date = next ? _viewStartDate.nextYear : _viewStartDate.previousYear;
           break;
-        case _PickerViewMode.year:
+        case PickerViewMode.year:
           final year = _viewStartDate.year - _viewStartDate.year % 20;
           date = next ? DateTime(year + 20) : DateTime(year - 20);
           break;
-        case _PickerViewMode.century:
+        case PickerViewMode.century:
           final year = _viewStartDate.year - _viewStartDate.year % 200;
           date = next ? DateTime(year + 200) : DateTime(year - 200);
           break;
@@ -783,14 +834,14 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       final year20 = _viewStartDate.year - _viewStartDate.year % 20;
       final year200 = _viewStartDate.year - _viewStartDate.year % 200;
       date = DateTime.now();
-      if (_viewMode == _PickerViewMode.day &&
+      if (_curViewMode == PickerViewMode.day &&
               date.month == _viewStartDate.month ||
-          _viewMode == _PickerViewMode.month &&
+          _curViewMode == PickerViewMode.month &&
               date.year == _viewStartDate.year ||
-          _viewMode == _PickerViewMode.year &&
+          _curViewMode == PickerViewMode.year &&
               date.year >= year20 &&
               (date.year - year20) < 20 ||
-          _viewMode == _PickerViewMode.century &&
+          _curViewMode == PickerViewMode.century &&
               date.year >= year200 &&
               (date.year - year200) < 200) {
         return;
@@ -806,65 +857,72 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   }
 
   void _onViewModeChanged({required bool next, DateTime? date}) {
-    setState(() {
-      _isViewModeChanged = true;
-      _viewMode = next ? _viewMode.next() : _viewMode.previous();
-      if (date != null) {
-        _viewStartDate = date;
-      }
-    });
+    final nextViewMode = next
+        ? _curViewMode.next()
+        : _curViewMode.previous(initViewMode: widget.initViewMode);
+    if (nextViewMode != _curViewMode) {
+      setState(() {
+        _isViewModeChanged = true;
+        _curViewMode = nextViewMode;
+        if (date != null) {
+          _viewStartDate = date;
+        }
+      });
+    }
   }
 
   void _onResetState() {
     setState(
       () {
-        _slideDirection =
-            widget.initialDate.isAfter(_viewStartDate) ? 1.0 : -1.0;
-        _selectedStartDate = _viewStartDate = widget.initialDate;
-        _selectedEndDate = widget.enableDateRangeSelection
+        _selectedStartDate = widget.initialDate;
+        _viewStartDate = widget.initialDate;
+        _selectedEndDate = widget.enableRangeSelection
             ? widget.initialDate2 ?? _selectedStartDate
             : _selectedStartDate;
-        _isViewModeChanged = _viewMode != _PickerViewMode.day;
-        _viewMode = _PickerViewMode.day;
+        _isViewModeChanged = _curViewMode != widget.initViewMode;
+        _curViewMode = widget.initViewMode;
+        _slideDirection =
+            widget.initialDate.isAfter(_viewStartDate) ? 1.0 : -1.0;
       },
     );
   }
 
   void _onSizeChanged(Size size, Size cellSize) {
-    // print("_onSizeChanged(size: $size, cellSize: $cellSize)");
+    print("_onSizeChanged(size: $size, cellSize: $cellSize)");
     _childSize = size;
   }
 }
 
-enum _PickerViewMode {
+enum PickerViewMode {
   day,
   month,
   year,
   century;
 
-  _PickerViewMode next() {
+  PickerViewMode next() {
     switch (this) {
-      case _PickerViewMode.day:
-        return _PickerViewMode.month;
-      case _PickerViewMode.month:
-        return _PickerViewMode.year;
-      case _PickerViewMode.year:
-        return _PickerViewMode.century;
-      case _PickerViewMode.century:
-        return _PickerViewMode.century;
+      case PickerViewMode.day:
+        return PickerViewMode.month;
+      case PickerViewMode.month:
+        return PickerViewMode.year;
+      case PickerViewMode.year:
+        return PickerViewMode.century;
+      case PickerViewMode.century:
+        return PickerViewMode.century;
     }
   }
 
-  _PickerViewMode previous() {
+  PickerViewMode previous({PickerViewMode initViewMode = PickerViewMode.day}) {
+    if (initViewMode == this) return this;
     switch (this) {
-      case _PickerViewMode.day:
-        return _PickerViewMode.day;
-      case _PickerViewMode.month:
-        return _PickerViewMode.day;
-      case _PickerViewMode.year:
-        return _PickerViewMode.month;
-      case _PickerViewMode.century:
-        return _PickerViewMode.year;
+      case PickerViewMode.day:
+        return PickerViewMode.day;
+      case PickerViewMode.month:
+        return PickerViewMode.day;
+      case PickerViewMode.year:
+        return PickerViewMode.month;
+      case PickerViewMode.century:
+        return PickerViewMode.year;
     }
   }
 }
@@ -873,7 +931,7 @@ class _PickerKey extends LocalKey {
   const _PickerKey({required this.date, required this.viewMode});
 
   final DateTime date;
-  final _PickerViewMode viewMode;
+  final PickerViewMode viewMode;
 
   @override
   bool operator ==(Object other) {

@@ -21,24 +21,29 @@
                 context: textFieldKey.currentContext!,
                 initialDate: _selectedDateRange.start,
                 initialDate2: _selectedDateRange.end,
-                firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                firstDate:
+                    DateTime.now().subtract(const Duration(days: 7)),
                 lastDate: DateTime.now().add(const Duration(days: 14000)),
-                // width: 400,
+                width: 400,
                 // withoutActionButtons: true,
                 weekendDaysColor: Colors.red,
                 // selectedDayColor: Colors.brown,
                 // backgroundColor: Colors.white,
                 // firstDayOfWeekIndex: 1,
                 asDialog: _asDialog,
-                enableDateRangeSelection: _enableDateRangeSelection,
-                // blockedDates: []
+                enableRangeSelection: _enableRangeSelection,
+                blockedDates: [DateTime.now().add(Duration(days: 2))],
+                initViewMode: _initViewMode,
+                // initSize: Size(370, 350),
             );
             if (pickedDateRange != null) {
                 _selectedDateRange = pickedDateRange;
-                if (_enableDateRangeSelection) {
-                _controller.text = "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
+                if (_enableRangeSelection) {
+                _controller.text =
+                    "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
                 } else {
-                _controller.text = _selectedDateRange.start.toString().split(' ')[0];
+                _controller.text =
+                    _selectedDateRange.start.toString().split(' ')[0];
                 }
             }
         },
@@ -82,4 +87,8 @@ The `backgroundColor` defines the picker background color.
 
 The `asDialog` = `true` will show the picker as dialog. By default, the picker is show as dropdown
 
-The `enableDateRangeSelection` is `true` to enable `DateRange` selection. The `initialDate` corresponds to `DateRange.start` and `initialDate2` corresponds to `DateRange.end`
+The `enableRangeSelection` is `true` to enable `DateRange` selection. The `initialDate` corresponds to `DateRange.start` and `initialDate2` corresponds to `DateRange.end`
+
+The `initViewMode` option to set initial view (e.g., month picker, year picker)
+
+The `initSize` option to set initial size

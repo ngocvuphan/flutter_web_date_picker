@@ -1,4 +1,3 @@
-import 'package:example/month_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vph_web_date_picker/vph_web_date_picker.dart';
@@ -21,7 +20,8 @@ class _MyAppState extends State<MyApp> {
   late DateTimeRange _selectedDateRange;
   Locale? _locale;
   bool _asDialog = false;
-  bool _enableDateRangeSelection = false;
+  bool _enableRangeSelection = false;
+  PickerViewMode _initViewMode = PickerViewMode.day;
 
   static const _supportedLocales = [
     Locale('en', 'US'),
@@ -38,7 +38,7 @@ class _MyAppState extends State<MyApp> {
         start: DateTime.now().subtract(Duration(days: 5)),
         end: DateTime.now().add(Duration(days: 5)));
     _controller = TextEditingController(
-        text: _enableDateRangeSelection
+        text: _enableRangeSelection
             ? "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}"
             : _selectedDateRange.start.toString().split(' ')[0]);
     _locale = _supportedLocales[0];
@@ -91,13 +91,30 @@ class _MyAppState extends State<MyApp> {
                 Row(
                   children: [
                     Checkbox(
-                      value: _enableDateRangeSelection,
+                      value: _enableRangeSelection,
                       onChanged: (v) => setState(() {
-                        _enableDateRangeSelection = v!;
+                        _enableRangeSelection = v!;
                       }),
                     ),
-                    const Text("enableDateRangeSelection"),
+                    const Text("enableRangeSelection"),
                   ],
+                ),
+                DropdownButton<PickerViewMode>(
+                  isExpanded: true,
+                  value: _initViewMode,
+                  items: PickerViewMode.values
+                      .map(
+                        (e) => DropdownMenuItem<PickerViewMode>(
+                          value: e,
+                          child: Text(e.toString()),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _initViewMode = value!;
+                    });
+                  },
                 ),
                 TextField(
                   key: textFieldKey,
@@ -105,25 +122,27 @@ class _MyAppState extends State<MyApp> {
                   readOnly: true,
                   onTap: () async {
                     final pickedDateRange = await showWebDatePicker(
-                        context: textFieldKey.currentContext!,
-                        initialDate: _selectedDateRange.start,
-                        initialDate2: _selectedDateRange.end,
-                        firstDate:
-                            DateTime.now().subtract(const Duration(days: 7)),
-                        lastDate:
-                            DateTime.now().add(const Duration(days: 14000)),
-                        width: 400,
-                        // withoutActionButtons: true,
-                        weekendDaysColor: Colors.red,
-                        // selectedDayColor: Colors.brown,
-                        // backgroundColor: Colors.white,
-                        // firstDayOfWeekIndex: 1,
-                        asDialog: _asDialog,
-                        enableDateRangeSelection: _enableDateRangeSelection,
-                        blockedDates: [DateTime.now().add(Duration(days: 2))]);
+                      context: textFieldKey.currentContext!,
+                      initialDate: _selectedDateRange.start,
+                      initialDate2: _selectedDateRange.end,
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 7)),
+                      lastDate: DateTime.now().add(const Duration(days: 14000)),
+                      width: 400,
+                      // withoutActionButtons: true,
+                      weekendDaysColor: Colors.red,
+                      // selectedDayColor: Colors.brown,
+                      // backgroundColor: Colors.white,
+                      // firstDayOfWeekIndex: 1,
+                      asDialog: _asDialog,
+                      enableRangeSelection: _enableRangeSelection,
+                      blockedDates: [DateTime.now().add(Duration(days: 2))],
+                      initViewMode: _initViewMode,
+                      // initSize: Size(370, 350),
+                    );
                     if (pickedDateRange != null) {
                       _selectedDateRange = pickedDateRange;
-                      if (_enableDateRangeSelection) {
+                      if (_enableRangeSelection) {
                         _controller.text =
                             "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
                       } else {
@@ -133,8 +152,6 @@ class _MyAppState extends State<MyApp> {
                     }
                   },
                 ),
-                //Month Picker
-                MonthPicker(),
               ],
             ),
           ),
