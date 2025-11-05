@@ -4,6 +4,11 @@ import 'package:vph_common_widgets/vph_common_widgets.dart';
 
 import 'helpers/extensions.dart';
 
+enum ButtonType {
+  today,
+  reset;
+}
+
 const kSlideTransitionDuration = Duration(milliseconds: 300);
 const kActionHeight = 36.0;
 
@@ -47,6 +52,10 @@ Future<DateTimeRange?> showWebDatePicker({
   List<DateTime>? blockedDates,
   PickerViewMode initViewMode = PickerViewMode.day,
   Size? initSize,
+  void Function()? onReset,
+  bool autoCloseOnDateSelect = false,
+  bool showTodayButton = true,
+  bool showResetButton = true,
 }) {
   if (asDialog) {
     final renderBox = context.findRenderObject()! as RenderBox;
@@ -74,6 +83,10 @@ Future<DateTimeRange?> showWebDatePicker({
               blockedDates: blockedDates ?? [],
               initViewMode: initViewMode,
               initSize: initSize,
+              onReset: onReset,
+              autoCloseOnDateSelect: autoCloseOnDateSelect,
+              showTodayButton: showTodayButton,
+              showResetButton: showResetButton,
             ),
           ),
         ),
@@ -98,6 +111,10 @@ Future<DateTimeRange?> showWebDatePicker({
         blockedDates: blockedDates ?? [],
         initViewMode: initViewMode,
         initSize: initSize,
+        onReset: onReset,
+        autoCloseOnDateSelect: autoCloseOnDateSelect,
+        showTodayButton: showTodayButton,
+        showResetButton: showResetButton,
       ),
       asDropDown: true,
       useTargetWidth: width != null ? false : true,
@@ -123,6 +140,10 @@ class _WebDatePicker extends StatefulWidget {
     this.enableRangeSelection = false,
     this.initViewMode = PickerViewMode.day,
     this.initSize,
+    this.onReset,
+    this.autoCloseOnDateSelect = false,
+    this.showTodayButton = true,
+    this.showResetButton = true,
   });
 
   final List<DateTime> blockedDates;
@@ -140,6 +161,10 @@ class _WebDatePicker extends StatefulWidget {
   final bool enableRangeSelection;
   final PickerViewMode initViewMode;
   final Size? initSize;
+  final void Function()? onReset;
+  final bool autoCloseOnDateSelect;
+  final bool showTodayButton;
+  final bool showResetButton;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -284,6 +309,10 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 }
               } else {
                 setState(() => _selectedStartDate = _selectedEndDate = date);
+                if (widget.autoCloseOnDateSelect) {
+                  Navigator.of(context).pop(DateTimeRange(
+                      start: _selectedStartDate, end: _selectedEndDate));
+                }
               }
             },
             onHover: (hovering) {
@@ -744,17 +773,22 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             Row(
               children: [
                 /// Reset
-                if (!widget.withoutActionButtons)
+                if (!widget.withoutActionButtons && widget.showResetButton)
                   _iconWidget(Icons.restart_alt,
                       tooltip: localizations.backButtonTooltip,
-                      onTap: _onResetState),
-                if (!widget.withoutActionButtons) const SizedBox(width: 4.0),
+                      onTap: _onResetState,
+                      buttonType: ButtonType.reset),
+                if (!widget.withoutActionButtons &&
+                    widget.showResetButton &&
+                    widget.showTodayButton)
+                  const SizedBox(width: 4.0),
 
                 /// Today
-                if (!widget.withoutActionButtons)
+                if (!widget.withoutActionButtons && widget.showTodayButton)
                   _iconWidget(Icons.today,
                       tooltip: localizations.currentDateLabel,
-                      onTap: _onStartDateChanged),
+                      onTap: _onStartDateChanged,
+                      buttonType: ButtonType.today),
                 const Spacer(),
 
                 /// CANCEL
@@ -790,8 +824,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     );
   }
 
-  Widget _iconWidget(IconData icon,
-      {Color? color, String? tooltip, GestureTapCallback? onTap}) {
+  Widget _iconWidget(IconData icon, {Color? color, String? tooltip, GestureTapCallback? onTap, ButtonType? buttonType}) {
     final child = Container(
       height: kActionHeight,
       width: kActionHeight,
@@ -802,7 +835,19 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     );
     if (onTap != null) {
       return InkWell(
-        onTap: onTap,
+        onTap: () {
+          onTap.call();
+          if (buttonType != null) {
+            switch (buttonType) {
+              case ButtonType.reset:
+                Navigator.of(context).pop(null);
+                break;
+              case ButtonType.today:
+                Navigator.of(context).pop(DateTimeRange(start: DateTime.now(), end: DateTime.now()));
+                break;
+            }
+          }
+        },
         customBorder: const CircleBorder(),
         child: child,
       );
