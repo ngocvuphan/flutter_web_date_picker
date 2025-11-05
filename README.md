@@ -7,7 +7,64 @@
 
 <img src="https://user-images.githubusercontent.com/756333/220562689-c232ce03-877e-48eb-83f5-0ed208ee0854.gif" width=400>
 
-### Usage
+## 📅 `showWebDatePicker`
+
+A customizable date picker widget for Flutter Web that supports both single-date and range selection. It offers extensive appearance and behavior customization for seamless integration into your UI.
+
+### ✅ Purpose
+
+Displays a date picker interface and returns a `Future<DateTimeRange?>` that resolves to the selected date(s) or `null` if canceled.
+
+---
+
+### 🧩 Parameters
+
+#### 🗓️ Date Configuration
+
+- `context` _(required)_: The build context.
+- `initialDate` _(required)_: The default date shown when the picker opens.
+- `initialDate2`: Optional second date for range selection.
+- `firstDate`: Earliest selectable date.
+- `lastDate`: Latest selectable date.
+
+#### 🎨 Appearance Customization
+
+- `width`: Width of the picker.
+- `weekendDaysColor`: Color used for weekend days.
+- `selectedDayColor`: Color for selected date(s).
+- `confirmButtonColor`: Color of the confirm button.
+- `cancelButtonColor`: Color of the cancel button.
+- `backgroundColor`: Background color of the picker.
+
+#### 📐 Layout & View
+
+- `firstDayOfWeekIndex`: Index of the first day of the week (e.g., 0 = Sunday).
+- `initViewMode`: Initial view mode (`PickerViewMode.day`, `month`, etc.).
+- `initSize`: Initial size of the picker widget.
+- `asDialog`: If `true`, shows the picker as a modal dialog.
+
+#### 🔄 Interaction Behavior
+
+- `enableRangeSelection`: Enables selecting a date range.
+- `blockedDates`: List of dates that are disabled and cannot be selected.
+- `showTodayButton`: Displays a button to jump to today's date.
+- `showResetButton`: Displays a button to reset the selection.
+- `autoCloseOnDateSelect`: Automatically closes the picker **after selecting a date**.  
+  **Note:** This only works when `enableRangeSelection` is `false` (i.e., single date selection mode).
+- `onReset`: Callback triggered when the reset button is pressed.
+
+---
+
+### 🔁 Return Value
+
+Returns a `Future<DateTimeRange?>`:
+
+- If a date or range is selected → returns `DateTimeRange`.
+- If the user cancels → returns `null`.
+
+---
+
+### 💡 Example Usage
 
 ```dart
     final textFieldKey = GlobalKey();
@@ -17,78 +74,28 @@
         controller: _controller,
         readOnly: true,
         onTap: () async {
-            final pickedDateRange = await showWebDatePicker(
-                context: textFieldKey.currentContext!,
-                initialDate: _selectedDateRange.start,
-                initialDate2: _selectedDateRange.end,
-                firstDate:
-                    DateTime.now().subtract(const Duration(days: 7)),
-                lastDate: DateTime.now().add(const Duration(days: 14000)),
-                width: 400,
-                // withoutActionButtons: true,
-                weekendDaysColor: Colors.red,
-                // selectedDayColor: Colors.brown,
-                // backgroundColor: Colors.white,
-                // firstDayOfWeekIndex: 1,
-                asDialog: _asDialog,
-                enableRangeSelection: _enableRangeSelection,
-                blockedDates: [DateTime.now().add(Duration(days: 2))],
-                initViewMode: _initViewMode,
-                // initSize: Size(370, 350),
-            );
-            if (pickedDateRange != null) {
-                _selectedDateRange = pickedDateRange;
-                if (_enableRangeSelection) {
-                _controller.text =
-                    "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
-                } else {
-                _controller.text =
-                    _selectedDateRange.start.toString().split(' ')[0];
-                }
-            }
-        },
-    ),
+        final pickedDateRange = await showWebDatePicker(
+            context: textFieldKey.currentContext!,
+            initialDate: _selectedDateRange.start,
+            initialDate2: _selectedDateRange.end,
+            firstDate: DateTime.now().subtract(const Duration(days: 7)),
+            lastDate: DateTime.now().add(const Duration(days: 14000)),
+            width: 400,
+            weekendDaysColor: Colors.red,
+            // selectedDayColor: Colors.brown,
+            // backgroundColor: Colors.white,
+            // firstDayOfWeekIndex: 1,
+            asDialog: _asDialog,
+            enableRangeSelection: _enableRangeSelection,
+            blockedDates: [DateTime.now().add(Duration(days: 2))],
+            initViewMode: _initViewMode,
+            // initSize: Size(370, 350),
+            showTodayButton: _showTodayButton,
+            showResetButton: _showResetButton,
+            autoCloseOnDateSelect: _autoCloseOnDateSelect,
+            // onReset: () {
+            //   print('Date selection reset');
+            // },
+        )
     ...
 ```
-
-`showWebDatePicker` shows a dialog containing a date picker.
-
-The returned [`Future`](https://api.flutter.dev/flutter/dart-async/Future-class.html) resolves to the date selected by the user when the
-user confirms the dialog. If the user cancels the dialog, null is returned.
-
-When the date picker is first displayed, it will show the month of
-`initialDate`, with `initialDate` selected.
-
-The `firstDate` is the earliest allowable date. The `lastDate` is the latest
-allowable date. `initialDate` must either fall between these dates,
-or be equal to one of them
-
-The `width` define the width of date picker dialog
-
-The month view action buttons include:
-
-- Reset button: jump to `initialDate` and select it
-- Today button: jump to today and select it
-
-The `withoutActionButtons` is `true`, the action buttons are removed from the month view. Default is `false`
-
-The `weekendDaysColor` defines the color of weekend days Saturday and Sunday. Default is `null`
-
-The `firstDayOfWeekIndex` defines the first day of the week.
-By default, firstDayOfWeekIndex = 0 indicates that Sunday is considered the first day of the week
-
-The `selectedDayColor` defines the color of selected day. Default is `primary` color
-
-The `confirmButtonColor` defines the color of confirm button. Default is `primary` color
-
-The `cancelButtonColor` defines the color of cancel button. Default is `primary` color
-
-The `backgroundColor` defines the picker background color.
-
-The `asDialog` = `true` will show the picker as dialog. By default, the picker is show as dropdown
-
-The `enableRangeSelection` is `true` to enable `DateRange` selection. The `initialDate` corresponds to `DateRange.start` and `initialDate2` corresponds to `DateRange.end`
-
-The `initViewMode` option to set initial view (e.g., month picker, year picker)
-
-The `initSize` option to set initial size

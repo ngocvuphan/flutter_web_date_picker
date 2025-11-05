@@ -1,3 +1,9 @@
+# [0.1.6] (11/05/2025)
+
+Replace `withoutActionButtons` with `showTodayButton` and `showTodayButton`
+Add `autoCloseOnDateSelect`.
+Add `onReset`
+
 # [0.1.5] (7/31/2025)
 
 RENAME - `enableDateRangeSelection` to `enableRangeSelection`

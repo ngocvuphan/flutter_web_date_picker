@@ -22,6 +22,9 @@ class _MyAppState extends State<MyApp> {
   bool _asDialog = false;
   bool _enableRangeSelection = false;
   PickerViewMode _initViewMode = PickerViewMode.day;
+  bool _showTodayButton = true;
+  bool _showResetButton = true;
+  bool _autoCloseOnDateSelect = false;
 
   static const _supportedLocales = [
     Locale('en', 'US'),
@@ -34,9 +37,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _selectedDateRange = DateTimeRange(
-        start: DateTime.now().subtract(Duration(days: 5)),
-        end: DateTime.now().add(Duration(days: 5)));
+    _selectedDateRange = DateTimeRange(start: DateTime.now().subtract(Duration(days: 5)), end: DateTime.now().add(Duration(days: 5)));
     _controller = TextEditingController(
         text: _enableRangeSelection
             ? "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}"
@@ -116,6 +117,39 @@ class _MyAppState extends State<MyApp> {
                     });
                   },
                 ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _showTodayButton,
+                      onChanged: (v) => setState(() {
+                        _showTodayButton = v!;
+                      }),
+                    ),
+                    const Text("showTodayButton"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _showResetButton,
+                      onChanged: (v) => setState(() {
+                        _showResetButton = v!;
+                      }),
+                    ),
+                    const Text("showResetButton"),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _autoCloseOnDateSelect,
+                      onChanged: (v) => setState(() {
+                        _autoCloseOnDateSelect = v!;
+                      }),
+                    ),
+                    const Text("autoCloseOnDateSelect"),
+                  ],
+                ),
                 TextField(
                   key: textFieldKey,
                   controller: _controller,
@@ -125,11 +159,9 @@ class _MyAppState extends State<MyApp> {
                       context: textFieldKey.currentContext!,
                       initialDate: _selectedDateRange.start,
                       initialDate2: _selectedDateRange.end,
-                      firstDate:
-                          DateTime.now().subtract(const Duration(days: 7)),
+                      firstDate: DateTime.now().subtract(const Duration(days: 7)),
                       lastDate: DateTime.now().add(const Duration(days: 14000)),
                       width: 400,
-                      // withoutActionButtons: true,
                       weekendDaysColor: Colors.red,
                       // selectedDayColor: Colors.brown,
                       // backgroundColor: Colors.white,
@@ -139,15 +171,19 @@ class _MyAppState extends State<MyApp> {
                       blockedDates: [DateTime.now().add(Duration(days: 2))],
                       initViewMode: _initViewMode,
                       // initSize: Size(370, 350),
+                      showTodayButton: _showTodayButton,
+                      showResetButton: _showResetButton,
+                      autoCloseOnDateSelect: _autoCloseOnDateSelect,
+                      // onReset: () {
+                      //   print('Date selection reset');
+                      // },
                     );
                     if (pickedDateRange != null) {
                       _selectedDateRange = pickedDateRange;
                       if (_enableRangeSelection) {
-                        _controller.text =
-                            "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
+                        _controller.text = "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
                       } else {
-                        _controller.text =
-                            _selectedDateRange.start.toString().split(' ')[0];
+                        _controller.text = _selectedDateRange.start.toString().split(' ')[0];
                       }
                     }
                   },
