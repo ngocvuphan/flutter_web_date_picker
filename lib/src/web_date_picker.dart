@@ -31,6 +31,8 @@ Future<DateTimeRange?> showWebDatePicker({
   Size? initSize,
   bool showTodayButton = true,
   bool showResetButton = true,
+  bool showOkButton = true,
+  bool showCancelButton = true,
   bool autoCloseOnDateSelect = false,
   void Function()? onReset,
 }) {
@@ -62,6 +64,8 @@ Future<DateTimeRange?> showWebDatePicker({
               showTodayButton: showTodayButton,
               showResetButton: showResetButton,
               autoCloseOnDateSelect: autoCloseOnDateSelect,
+              showOkButton: showOkButton,
+              showCancelButton: showCancelButton,
               onReset: onReset,
             ),
           ),
@@ -89,6 +93,8 @@ Future<DateTimeRange?> showWebDatePicker({
         showTodayButton: showTodayButton,
         showResetButton: showResetButton,
         autoCloseOnDateSelect: autoCloseOnDateSelect,
+        showOkButton: showOkButton,
+        showCancelButton: showCancelButton,
         onReset: onReset,
       ),
       asDropDown: true,
@@ -116,6 +122,8 @@ class _WebDatePicker extends StatefulWidget {
     this.initSize,
     this.showTodayButton = true,
     this.showResetButton = true,
+    this.showOkButton = true,
+    this.showCancelButton = true,
     this.autoCloseOnDateSelect = false,
     this.onReset,
   });
@@ -136,6 +144,8 @@ class _WebDatePicker extends StatefulWidget {
   final Size? initSize;
   final bool showTodayButton;
   final bool showResetButton;
+  final bool showOkButton;
+  final bool showCancelButton;
   final bool autoCloseOnDateSelect;
   final void Function()? onReset;
 
@@ -692,16 +702,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 const Spacer(),
 
                 /// CANCEL
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    localizations.cancelButtonLabel,
-                    style: TextStyle(color: widget.cancelButtonColor ?? theme.colorScheme.primary),
+                if (widget.showCancelButton)
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      localizations.cancelButtonLabel,
+                      style: TextStyle(color: widget.cancelButtonColor ?? theme.colorScheme.primary),
+                    ),
                   ),
-                ),
 
                 /// OK
-                if (_curViewMode == widget.initViewMode) ...[
+                if (widget.showOkButton && _curViewMode == widget.initViewMode) ...[
                   const SizedBox(width: 4.0),
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(DateTimeRange(start: _selectedStartDate, end: _selectedEndDate)),
