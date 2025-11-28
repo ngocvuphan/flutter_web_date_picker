@@ -1,3 +1,8 @@
+# [0.1.7] (11/28/2025)
+
+Merge pull request #19 from AbRa734/main:
+Add parameters to hide OK and cancel buttons
+
 # [0.1.6] (11/05/2025)
 
 Replace `withoutActionButtons` with `showTodayButton` and `showTodayButton`
