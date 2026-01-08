@@ -177,6 +177,7 @@ class _MyAppState extends State<MyApp> {
                       // onReset: () {
                       //   print('Date selection reset');
                       // },
+                      // showDisabledCursor: true,
                     );
                     if (pickedDateRange != null) {
                       _selectedDateRange = pickedDateRange;

@@ -1,3 +1,8 @@
+# [0.1.8] (1/8/2026)
+
+Merge pull request #20 from AbRa734/main:
+add showDisabledCursor parameter to control disabled date cursor style
+
 # [0.1.7] (11/28/2025)
 
 Merge pull request #19 from AbRa734/main:

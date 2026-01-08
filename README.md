@@ -52,6 +52,7 @@ Displays a date picker interface and returns a `Future<DateTimeRange?>` that res
 - `autoCloseOnDateSelect`: Automatically closes the picker **after selecting a date**.  
   **Note:** This only works when `enableRangeSelection` is `false` (i.e., single date selection mode).
 - `onReset`: Callback triggered when the reset button is pressed.
+- `showDisabledCursor`: Controls the cursor style for disabled dates
 
 ---
 
@@ -96,6 +97,7 @@ Returns a `Future<DateTimeRange?>`:
             // onReset: () {
             //   print('Date selection reset');
             // },
+            // showDisabledCursor: true,
         )
     ...
 ```
