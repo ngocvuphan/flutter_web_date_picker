@@ -34,6 +34,7 @@ Future<DateTimeRange?> showWebDatePicker({
   bool showOkButton = true,
   bool showCancelButton = true,
   bool autoCloseOnDateSelect = false,
+  bool showDisabledCursor = false,
   void Function()? onReset,
 }) {
   if (asDialog) {
@@ -66,6 +67,7 @@ Future<DateTimeRange?> showWebDatePicker({
               autoCloseOnDateSelect: autoCloseOnDateSelect,
               showOkButton: showOkButton,
               showCancelButton: showCancelButton,
+              showDisabledCursor: showDisabledCursor,
               onReset: onReset,
             ),
           ),
@@ -95,6 +97,7 @@ Future<DateTimeRange?> showWebDatePicker({
         autoCloseOnDateSelect: autoCloseOnDateSelect,
         showOkButton: showOkButton,
         showCancelButton: showCancelButton,
+        showDisabledCursor: showDisabledCursor,
         onReset: onReset,
       ),
       asDropDown: true,
@@ -125,6 +128,7 @@ class _WebDatePicker extends StatefulWidget {
     this.showOkButton = true,
     this.showCancelButton = true,
     this.autoCloseOnDateSelect = false,
+    this.showDisabledCursor = false,
     this.onReset,
   });
 
@@ -147,6 +151,7 @@ class _WebDatePicker extends StatefulWidget {
   final bool showOkButton;
   final bool showCancelButton;
   final bool autoCloseOnDateSelect;
+  final bool showDisabledCursor;
   final void Function()? onReset;
 
   @override
@@ -296,6 +301,11 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             customBorder: const CircleBorder(),
             child: child,
           );
+        } else if (widget.showDisabledCursor) {
+          child = MouseRegion(
+            cursor: SystemMouseCursors.forbidden,
+            child: child,
+          );
         }
         if (widget.enableRangeSelection) {
           final dfBorderSide = BorderSide(color: color, width: 1.0, style: BorderStyle.solid);
@@ -377,6 +387,11 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           borderRadius: borderRadius,
           child: child,
         );
+      } else {
+        child = MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
+          child: child,
+        );
       }
       children.add(
         Padding(
@@ -426,6 +441,11 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             }
           },
           borderRadius: borderRadius,
+          child: child,
+        );
+      } else if (widget.showDisabledCursor) {
+        child = MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
           child: child,
         );
       }
@@ -480,6 +500,11 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             }
           },
           borderRadius: borderRadius,
+          child: child,
+        );
+      } else if (widget.showDisabledCursor) {
+        child = MouseRegion(
+          cursor: SystemMouseCursors.forbidden,
           child: child,
         );
       }
