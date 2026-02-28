@@ -1,3 +1,7 @@
+# [0.1.10] (2/28/2026)
+
+feat: make "Today" button select current date and respect auto-close ([AbRa734/fix/on-select-today](https://github.com/AbRa734/flutter_web_date_picker/tree/fix/on-select-today))
+
 # [0.1.9] (2/24/2026)
 
 - feat: add support for custom text in the 'Today' button ([AbRa734:main](https://github.com/AbRa734/flutter_web_date_picker/tree/main))

@@ -37,7 +37,33 @@ Future<DateTimeRange?> showWebDatePicker({
   bool showDisabledCursor = false,
   void Function()? onReset,
   String? todayButtonText,
+  bool selectTodayOnClick = false,
 }) {
+  final webDatePicker = _WebDatePicker(
+    initialDate: initialDate,
+    initialDate2: initialDate2,
+    firstDate: firstDate ?? DateTime(0),
+    lastDate: lastDate ?? DateTime(100000),
+    weekendDaysColor: weekendDaysColor,
+    firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
+    selectedDayColor: selectedDayColor,
+    confirmButtonColor: confirmButtonColor,
+    cancelButtonColor: cancelButtonColor,
+    backgroundColor: backgroundColor,
+    enableRangeSelection: enableRangeSelection,
+    blockedDates: blockedDates ?? [],
+    initViewMode: initViewMode,
+    initSize: initSize,
+    showTodayButton: showTodayButton,
+    showResetButton: showResetButton,
+    autoCloseOnDateSelect: autoCloseOnDateSelect,
+    showOkButton: showOkButton,
+    showCancelButton: showCancelButton,
+    showDisabledCursor: showDisabledCursor,
+    onReset: onReset,
+    todayButtonText: todayButtonText,
+    selectTodayOnClick: selectTodayOnClick,
+  );
   if (asDialog) {
     final renderBox = context.findRenderObject()! as RenderBox;
     return showDialog<DateTimeRange?>(
@@ -48,30 +74,7 @@ Future<DateTimeRange?> showWebDatePicker({
         content: SingleChildScrollView(
           child: SizedBox(
             width: width ?? renderBox.size.width,
-            child: _WebDatePicker(
-              initialDate: initialDate,
-              initialDate2: initialDate2,
-              firstDate: firstDate ?? DateTime(0),
-              lastDate: lastDate ?? DateTime(100000),
-              weekendDaysColor: weekendDaysColor,
-              firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
-              selectedDayColor: selectedDayColor,
-              confirmButtonColor: confirmButtonColor,
-              cancelButtonColor: cancelButtonColor,
-              backgroundColor: backgroundColor,
-              enableRangeSelection: enableRangeSelection,
-              blockedDates: blockedDates ?? [],
-              initViewMode: initViewMode,
-              initSize: initSize,
-              showTodayButton: showTodayButton,
-              showResetButton: showResetButton,
-              autoCloseOnDateSelect: autoCloseOnDateSelect,
-              showOkButton: showOkButton,
-              showCancelButton: showCancelButton,
-              showDisabledCursor: showDisabledCursor,
-              onReset: onReset,
-              todayButtonText: todayButtonText,
-            ),
+            child: webDatePicker,
           ),
         ),
       ),
@@ -79,30 +82,7 @@ Future<DateTimeRange?> showWebDatePicker({
   } else {
     return showPopupDialog<DateTimeRange?>(
       context,
-      (context) => _WebDatePicker(
-        initialDate: initialDate,
-        initialDate2: initialDate2,
-        firstDate: firstDate ?? DateTime(0),
-        lastDate: lastDate ?? DateTime(100000),
-        weekendDaysColor: weekendDaysColor,
-        firstDayOfWeekIndex: firstDayOfWeekIndex ?? 0,
-        selectedDayColor: selectedDayColor,
-        confirmButtonColor: confirmButtonColor,
-        cancelButtonColor: cancelButtonColor,
-        backgroundColor: backgroundColor,
-        enableRangeSelection: enableRangeSelection,
-        blockedDates: blockedDates ?? [],
-        initViewMode: initViewMode,
-        initSize: initSize,
-        showTodayButton: showTodayButton,
-        showResetButton: showResetButton,
-        autoCloseOnDateSelect: autoCloseOnDateSelect,
-        showOkButton: showOkButton,
-        showCancelButton: showCancelButton,
-        showDisabledCursor: showDisabledCursor,
-        onReset: onReset,
-        todayButtonText: todayButtonText,
-      ),
+      (context) => webDatePicker,
       asDropDown: true,
       useTargetWidth: width != null ? false : true,
       dialogWidth: width,
@@ -134,6 +114,7 @@ class _WebDatePicker extends StatefulWidget {
     this.showDisabledCursor = false,
     this.onReset,
     this.todayButtonText,
+    this.selectTodayOnClick = false,
   });
 
   final List<DateTime> blockedDates;
@@ -158,6 +139,7 @@ class _WebDatePicker extends StatefulWidget {
   final bool showDisabledCursor;
   final void Function()? onReset;
   final String? todayButtonText;
+  final bool selectTodayOnClick;
 
   @override
   State<_WebDatePicker> createState() => _WebDatePickerState();
@@ -564,15 +546,14 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    final isEnabled = today.isInDateRange(widget.firstDate, widget.lastDate) && 
-                      !today.isBlockedDate(widget.blockedDates, today);
+    final isEnabled = today.isInDateRange(widget.firstDate, widget.lastDate) && !today.isBlockedDate(widget.blockedDates, today);
 
     if (!isEnabled) {
       setState(() {
         _viewStartDate = today;
         _curViewMode = PickerViewMode.day;
       });
-      return; 
+      return;
     }
 
     if (widget.enableRangeSelection) {
@@ -764,7 +745,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 if (widget.showTodayButton)
                   if (widget.todayButtonText != null)
                     TextButton(
-                      onPressed: _onSelectToday,
+                      onPressed: widget.selectTodayOnClick ? _onSelectToday : _onStartDateChanged,
                       child: Text(
                         widget.todayButtonText!,
                         style: TextStyle(
@@ -776,7 +757,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                     _iconWidget(
                       Icons.today,
                       tooltip: localizations.currentDateLabel,
-                      onTap: _onSelectToday,
+                      onTap: widget.selectTodayOnClick ? _onSelectToday : _onStartDateChanged,
                     ),
 
                 const Spacer(),

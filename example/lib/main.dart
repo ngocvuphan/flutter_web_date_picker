@@ -25,6 +25,7 @@ class _MyAppState extends State<MyApp> {
   bool _showTodayButton = true;
   bool _showResetButton = true;
   bool _autoCloseOnDateSelect = false;
+  bool _selectTodayOnClick = false;
 
   static const _supportedLocales = [
     Locale('en', 'US'),
@@ -150,6 +151,17 @@ class _MyAppState extends State<MyApp> {
                     const Text("autoCloseOnDateSelect"),
                   ],
                 ),
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _selectTodayOnClick,
+                      onChanged: (v) => setState(() {
+                        _selectTodayOnClick = v!;
+                      }),
+                    ),
+                    const Text("selectTodayOnClick"),
+                  ],
+                ),
                 TextField(
                   key: textFieldKey,
                   controller: _controller,
@@ -178,6 +190,7 @@ class _MyAppState extends State<MyApp> {
                       //   print('Date selection reset');
                       // },
                       // showDisabledCursor: true,
+                      selectTodayOnClick: _selectTodayOnClick,
                     );
                     if (pickedDateRange != null) {
                       _selectedDateRange = pickedDateRange;
