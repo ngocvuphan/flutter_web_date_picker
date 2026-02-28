@@ -560,6 +560,44 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     }
   }
 
+  void _onSelectToday() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final isEnabled = today.isInDateRange(widget.firstDate, widget.lastDate) && 
+                      !today.isBlockedDate(widget.blockedDates, today);
+
+    if (!isEnabled) {
+      setState(() {
+        _viewStartDate = today;
+        _curViewMode = PickerViewMode.day;
+      });
+      return; 
+    }
+
+    if (widget.enableRangeSelection) {
+      setState(() {
+        _viewStartDate = today;
+        _curViewMode = PickerViewMode.day;
+        _selectedStartDate = today;
+        _selectedEndDate = today;
+        _hoveredStartDate = null;
+        _hoveredEndDate = null;
+      });
+    } else {
+      setState(() {
+        _viewStartDate = today;
+        _curViewMode = PickerViewMode.day;
+        _selectedStartDate = today;
+        _selectedEndDate = today;
+      });
+
+      if (widget.autoCloseOnDateSelect) {
+        Navigator.of(context).pop(DateTimeRange(start: _selectedStartDate, end: _selectedEndDate));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -726,7 +764,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                 if (widget.showTodayButton)
                   if (widget.todayButtonText != null)
                     TextButton(
-                      onPressed: () => _onStartDateChanged(),
+                      onPressed: _onSelectToday,
                       child: Text(
                         widget.todayButtonText!,
                         style: TextStyle(
@@ -738,7 +776,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
                     _iconWidget(
                       Icons.today,
                       tooltip: localizations.currentDateLabel,
-                      onTap: _onStartDateChanged,
+                      onTap: _onSelectToday,
                     ),
 
                 const Spacer(),
