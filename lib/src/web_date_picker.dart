@@ -1,4 +1,8 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 import 'package:vph_common_widgets/vph_common_widgets.dart';
 
@@ -158,6 +162,11 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   bool _isViewModeChanged = false;
   Size? _childSize;
 
+  // Keyboard navigation: focus cursor tracks keyboard position separately from selection
+  late DateTime _focusedDate;
+  // FocusNode for the day-grid keyboard listener; disposed in dispose()
+  final FocusNode _gridFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -178,7 +187,29 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             widget.initialDate2?.day ?? widget.initialDate.month,
           )
         : _selectedStartDate;
+    // Initialize keyboard focus cursor to the initial date
+    _focusedDate = DateTime(
+      widget.initialDate.year,
+      widget.initialDate.month,
+      widget.initialDate.day,
+    );
+    // Repaint day cells whenever the grid gains or loses focus (e.g. via Tab)
+    _gridFocusNode.addListener(_onFocusChange);
+    // Auto-focus the grid so keyboard input is captured immediately on open
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _gridFocusNode.requestFocus();
+    });
   }
+
+  @override
+  void dispose() {
+    _gridFocusNode.removeListener(_onFocusChange);
+    _gridFocusNode.dispose();
+    super.dispose();
+  }
+
+  // Triggers a repaint so the focus ring appears/disappears when focus changes
+  void _onFocusChange() => setState(() {});
 
   List<Widget> _buildDaysOfMonthCells(ThemeData theme) {
     final textStyle = theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurface);
@@ -214,6 +245,9 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         final isSelectedRight = isSelected && date.compareToEx(_selectedEndDate, DateTimeCompareMode.day) == 0;
         final isNow = date.compareToEx(now, DateTimeCompareMode.day) == 0;
         final isWeekend = date.weekday == DateTime.saturday || date.weekday == DateTime.sunday;
+        // Whether this cell is the keyboard focus cursor (distinct from selection)
+        final isFocused = _gridFocusNode.hasFocus &&
+            date.compareToEx(_focusedDate, DateTimeCompareMode.day) == 0;
         final color = isEnabled ? widget.selectedDayColor ?? theme.colorScheme.primary : widget.selectedDayColor?.withAlpha(128) ?? theme.colorScheme.primary.withAlpha(128);
         final cellTextStyle = isSelected
             ? textStyle?.copyWith(color: theme.colorScheme.onPrimary)
@@ -226,13 +260,25 @@ class _WebDatePickerState extends State<_WebDatePicker> {
         final isHovered = widget.enableRangeSelection && _hoveredStartDate != null && _hoveredEndDate != null && date.isInDateRange(_hoveredStartDate!, _hoveredEndDate!);
         final isHoveredLeft = isHovered && date.compareToEx(_hoveredStartDate!, DateTimeCompareMode.day) == 0;
         final isHoveredRight = isHovered && date.compareToEx(_hoveredEndDate!, DateTimeCompareMode.day) == 0;
+        BoxBorder? cellBorder;
+        if (isFocused && isSelected) {
+          // focused + selected  → filled primary + 1.5 px white inset border
+          cellBorder = Border.all(color: Colors.white, width: 1.5);
+        } else if (isFocused) {
+          // focused only        → transparent fill + 1.5 px primary border
+          cellBorder = Border.all(color: theme.colorScheme.primary, width: 1.5);
+        } else if (isNow && !isSelected) {
+          // today (unfocused)   → existing thin color border (unchanged)
+          cellBorder = Border.all(color: color);
+        }
+
         Widget child = Container(
           alignment: Alignment.center,
           margin: EdgeInsets.all(2.0),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: isSelected ? color : null,
-            border: isNow && !isSelected ? Border.all(color: color) : null,
+            border: cellBorder,
           ),
           child: Text(date.day.toString(), style: cellTextStyle),
         );
@@ -326,6 +372,14 @@ class _WebDatePickerState extends State<_WebDatePicker> {
             ],
           );
         }
+        // Accessibility: wrap each day cell with a full date label for screen readers
+        child = Semantics(
+          label: DateFormat('EEEE, MMMM d, y').format(date),
+          selected: isSelected,
+          enabled: isEnabled,
+          button: true,
+          child: child,
+        );
         children.add(child);
       } else {
         children.add(Container());
@@ -508,12 +562,19 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   Widget _buildChild(ThemeData theme) {
     switch (_curViewMode) {
       case PickerViewMode.day:
-        return UniformGrid(
+        // Wrap with Focus to capture keyboard events for the day grid.
+        // _PickerKey is placed on the outermost widget (Focus) so that
+        // AnimatedSwitcher correctly detects month changes for the slide animation.
+        return Focus(
           key: _PickerKey(date: _viewStartDate, viewMode: _curViewMode),
-          columnCount: 7,
-          squareCell: true,
-          onSizeChanged: _onSizeChanged,
-          children: _buildDaysOfMonthCells(theme),
+          focusNode: _gridFocusNode,
+          onKeyEvent: _onKeyEvent,
+          child: UniformGrid(
+            columnCount: 7,
+            squareCell: true,
+            onSizeChanged: _onSizeChanged,
+            children: _buildDaysOfMonthCells(theme),
+          ),
         );
       case PickerViewMode.month:
         return UniformGrid(
@@ -550,6 +611,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
 
     if (!isEnabled) {
       setState(() {
+        _focusedDate = today; // sync keyboard cursor even when date is out of selectable range
         _viewStartDate = today;
         _curViewMode = PickerViewMode.day;
       });
@@ -558,6 +620,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
 
     if (widget.enableRangeSelection) {
       setState(() {
+        _focusedDate = today; // sync keyboard focus cursor to today
         _viewStartDate = today;
         _curViewMode = PickerViewMode.day;
         _selectedStartDate = today;
@@ -567,6 +630,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
       });
     } else {
       setState(() {
+        _focusedDate = today; // sync keyboard focus cursor to today
         _viewStartDate = today;
         _curViewMode = PickerViewMode.day;
         _selectedStartDate = today;
@@ -588,12 +652,17 @@ class _WebDatePickerState extends State<_WebDatePicker> {
     final txtDirection = Directionality.of(context);
     switch (_curViewMode) {
       case PickerViewMode.day:
-        navTitle = Container(
-          height: kActionHeight,
-          alignment: Alignment.center,
-          child: Text(
-            localizations.formatMonthYear(_viewStartDate).capitalize(),
-            style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
+        // Accessibility: announce month/year header as a navigation landmark
+        navTitle = Semantics(
+          header: true,
+          label: DateFormat('MMMM y').format(_viewStartDate),
+          child: Container(
+            height: kActionHeight,
+            alignment: Alignment.center,
+            child: Text(
+              localizations.formatMonthYear(_viewStartDate).capitalize(),
+              style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold),
+            ),
           ),
         );
         final monthDateRange = _viewStartDate.monthDateTimeRange(
@@ -657,7 +726,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
           children: [
             /// Navigation
             Row(
-              children: txtDirection == TextDirection.ltr
+              children: txtDirection == ui.TextDirection.ltr
                   ? [
                       isFirst
                           ? _iconWidget(Icons.keyboard_arrow_left, color: theme.disabledColor)
@@ -871,6 +940,7 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   void _onResetState() {
     setState(
       () {
+        _focusedDate = widget.initialDate; // reset keyboard focus cursor to initial date
         _selectedStartDate = widget.initialDate;
         _viewStartDate = widget.initialDate;
         _selectedEndDate = widget.enableRangeSelection ? widget.initialDate2 ?? _selectedStartDate : _selectedStartDate;
@@ -885,6 +955,145 @@ class _WebDatePickerState extends State<_WebDatePicker> {
   void _onSizeChanged(Size size, Size cellSize) {
     // print("_onSizeChanged(size: $size, cellSize: $cellSize)");
     _childSize = size;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Keyboard navigation
+  // ---------------------------------------------------------------------------
+
+  // Dispatches keyboard events for the day grid.
+  // Returns KeyEventResult.handled for all consumed keys so the browser/app
+  // does not scroll or propagate them further.
+  KeyEventResult _onKeyEvent(FocusNode node, KeyEvent event) {
+    // Only react to key-down and key-repeat (held key) events
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
+      return KeyEventResult.ignored;
+    }
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.arrowLeft) {
+      _moveFocus(-1);
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.arrowRight) {
+      _moveFocus(1);
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.arrowUp) {
+      _moveFocus(-7);
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.arrowDown) {
+      _moveFocus(7);
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.pageUp) {
+      _moveFocusByMonth(-1);
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.pageDown) {
+      _moveFocusByMonth(1);
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.home) {
+      // Jump to the first day of the currently displayed month
+      setState(() {
+        _focusedDate = DateTime(_viewStartDate.year, _viewStartDate.month);
+      });
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.end) {
+      // Jump to the last day of the currently displayed month
+      setState(() {
+        _focusedDate = DateTime(_viewStartDate.year, _viewStartDate.month + 1, 0);
+      });
+      return KeyEventResult.handled;
+    } else if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) {
+      _confirmFocusedDate();
+      return KeyEventResult.handled;
+    }
+    // Do not intercept Tab, Escape, or any other key so native routing can handle them.
+    return KeyEventResult.ignored;
+  }
+
+  // Moves _focusedDate by [days] (±1 or ±7), skipping blocked dates and
+  // clamping to firstDate/lastDate. Automatically advances _viewStartDate
+  // when focus crosses a month boundary.
+  void _moveFocus(int days) {
+    DateTime candidate = _focusedDate.add(Duration(days: days));
+    // Clamp to the allowed date range
+    if (candidate.isBefore(widget.firstDate)) candidate = widget.firstDate;
+    if (candidate.isAfter(widget.lastDate)) candidate = widget.lastDate;
+    // Skip over blocked dates in the direction of travel
+    final step = days.sign;
+    while (candidate.isBlockedDate(widget.blockedDates, candidate)) {
+      final next = candidate.add(Duration(days: step));
+      // Stop if the next step would leave the allowed range
+      if (next.isBefore(widget.firstDate) || next.isAfter(widget.lastDate)) break;
+      candidate = next;
+    }
+    // If we still land on a blocked date (e.g. boundary), do not move
+    if (candidate.isBlockedDate(widget.blockedDates, candidate)) return;
+    setState(() {
+      _focusedDate = candidate;
+      // Follow focus across month boundaries with the existing slide animation
+      if (_focusedDate.year != _viewStartDate.year ||
+          _focusedDate.month != _viewStartDate.month) {
+        _slideDirection = _focusedDate.isAfter(_viewStartDate) ? 1.0 : -1.0;
+        _isViewModeChanged = false;
+        _viewStartDate = DateTime(_focusedDate.year, _focusedDate.month);
+      }
+    });
+  }
+
+  // Moves _focusedDate by [delta] months (PageUp: -1, PageDown: +1).
+  // Clamps the day to the last day of the new month if it is shorter.
+  void _moveFocusByMonth(int delta) {
+    // Compute target month/year with correct wrap-around arithmetic
+    final rawMonth = _focusedDate.month + delta;
+    final targetYear = _focusedDate.year + ((rawMonth - 1) ~/ 12);
+    final targetMonth = ((rawMonth - 1) % 12) + 1;
+    // Clamp the day to the last valid day in the new month
+    final lastDayOfMonth = DateTime(targetYear, targetMonth + 1, 0).day;
+    final clampedDay = _focusedDate.day.clamp(1, lastDayOfMonth);
+    DateTime candidate = DateTime(targetYear, targetMonth, clampedDay);
+    // Clamp to the allowed date range
+    if (candidate.isBefore(widget.firstDate)) candidate = widget.firstDate;
+    if (candidate.isAfter(widget.lastDate)) candidate = widget.lastDate;
+    setState(() {
+      _focusedDate = candidate;
+      _slideDirection = delta > 0 ? 1.0 : -1.0;
+      _isViewModeChanged = false;
+      _viewStartDate = DateTime(_focusedDate.year, _focusedDate.month);
+    });
+  }
+
+  // Confirms the currently focused date as the selection, mirroring the
+  // existing mouse tap logic exactly (including range selection behaviour).
+  void _confirmFocusedDate() {
+    final date = _focusedDate;
+    final isEnabled = date.isInDateRange(widget.firstDate, widget.lastDate) &&
+        !date.isBlockedDate(widget.blockedDates, date);
+    if (!isEnabled) return;
+
+    if (widget.enableRangeSelection) {
+      if (_selectedStartDate.compareToEx(_selectedEndDate, DateTimeCompareMode.day) < 0) {
+        // A range is already set — start a new selection from this date
+        setState(() {
+          _selectedStartDate = _selectedEndDate = date;
+          _hoveredStartDate = _hoveredEndDate = null;
+        });
+      } else if (date.compareToEx(_selectedStartDate, DateTimeCompareMode.day) <= 0) {
+        setState(() {
+          _selectedStartDate = date;
+          _hoveredStartDate = _hoveredEndDate = null;
+        });
+      } else {
+        setState(() {
+          _selectedEndDate = date;
+          _hoveredStartDate = _hoveredEndDate = null;
+        });
+      }
+    } else {
+      setState(() => _selectedStartDate = _selectedEndDate = date);
+      if (widget.autoCloseOnDateSelect) {
+        Navigator.of(context).pop(
+          DateTimeRange(start: _selectedStartDate, end: _selectedEndDate),
+        );
+      }
+    }
   }
 }
 
