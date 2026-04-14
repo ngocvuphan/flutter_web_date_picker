@@ -54,7 +54,7 @@ Displays a date picker interface and returns a `Future<DateTimeRange?>` that res
 - `onReset`: Callback triggered when the reset button is pressed.
 - `showDisabledCursor`: Controls the cursor style for disabled dates
 
-### ⌨️ Keyboard Navigation
+#### ⌨️ Keyboard Navigation
 
 Implemented keyboard listeners for specific keystrokes:
 
