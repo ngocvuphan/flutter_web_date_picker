@@ -1,3 +1,7 @@
+# [0.1.11] (4/14/2026)
+
+feat: support keyboard navigation by [Ajaystefin:feature/keyboard-navigation-day-grid](https://github.com/Ajaystefin/flutter_web_date_picker/tree/feature/keyboard-navigation-day-grid)
+
 # [0.1.10] (2/28/2026)
 
 feat: make "Today" button select current date and respect auto-close ([AbRa734/fix/on-select-today](https://github.com/AbRa734/flutter_web_date_picker/tree/fix/on-select-today))

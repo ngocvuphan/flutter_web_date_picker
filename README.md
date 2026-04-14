@@ -54,6 +54,15 @@ Displays a date picker interface and returns a `Future<DateTimeRange?>` that res
 - `onReset`: Callback triggered when the reset button is pressed.
 - `showDisabledCursor`: Controls the cursor style for disabled dates
 
+### ⌨️ Keyboard Navigation
+
+Implemented keyboard listeners for specific keystrokes:
+
+- **Arrows** → Day‑by‑day navigation (skipping blocked dates)
+- **Page Up / Page Down** → Month‑by‑month navigation
+- **Home / End** → Jump to the first/last day of the current month
+- **Enter / Numpad Enter** → Confirms the focused date (supports both single and range selection modes)
+
 ---
 
 ### 🔁 Return Value
@@ -77,27 +86,28 @@ Returns a `Future<DateTimeRange?>`:
         onTap: () async {
         final pickedDateRange = await showWebDatePicker(
             context: textFieldKey.currentContext!,
-            initialDate: _selectedDateRange.start,
-            initialDate2: _selectedDateRange.end,
-            firstDate: DateTime.now().subtract(const Duration(days: 7)),
-            lastDate: DateTime.now().add(const Duration(days: 14000)),
-            width: 400,
-            weekendDaysColor: Colors.red,
-            // selectedDayColor: Colors.brown,
-            // backgroundColor: Colors.white,
-            // firstDayOfWeekIndex: 1,
-            asDialog: _asDialog,
-            enableRangeSelection: _enableRangeSelection,
-            blockedDates: [DateTime.now().add(Duration(days: 2))],
-            initViewMode: _initViewMode,
-            // initSize: Size(370, 350),
-            showTodayButton: _showTodayButton,
-            showResetButton: _showResetButton,
-            autoCloseOnDateSelect: _autoCloseOnDateSelect,
-            // onReset: () {
-            //   print('Date selection reset');
-            // },
-            // showDisabledCursor: true,
+                initialDate: _selectedDateRange.start,
+                initialDate2: _selectedDateRange.end,
+                firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                lastDate: DateTime.now().add(const Duration(days: 14000)),
+                width: 400,
+                weekendDaysColor: Colors.red,
+                // selectedDayColor: Colors.brown,
+                // backgroundColor: Colors.white,
+                // firstDayOfWeekIndex: 1,
+                asDialog: _asDialog,
+                enableRangeSelection: _enableRangeSelection,
+                blockedDates: [DateTime.now().add(Duration(days: 2))],
+                initViewMode: _initViewMode,
+                // initSize: Size(370, 350),
+                showTodayButton: _showTodayButton,
+                showResetButton: _showResetButton,
+                autoCloseOnDateSelect: _autoCloseOnDateSelect,
+                // onReset: () {
+                //   print('Date selection reset');
+                // },
+                // showDisabledCursor: true,
+                selectTodayOnClick: _selectTodayOnClick,
         )
     ...
 ```
