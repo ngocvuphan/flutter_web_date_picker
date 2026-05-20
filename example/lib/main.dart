@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:vph_web_date_picker/vph_web_date_picker.dart';
 
-// import 'material_theme/color_schemes.g.dart';
-
 void main() {
   runApp(const MyApp());
 }
@@ -38,7 +36,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _selectedDateRange = DateTimeRange(start: DateTime.now().subtract(Duration(days: 5)), end: DateTime.now().add(Duration(days: 5)));
+    _selectedDateRange = DateTimeRange(
+        start: DateTime.now().subtract(Duration(days: 5)),
+        end: DateTime.now().add(Duration(days: 5)));
     _controller = TextEditingController(
         text: _enableRangeSelection
             ? "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}"
@@ -171,7 +171,8 @@ class _MyAppState extends State<MyApp> {
                       context: textFieldKey.currentContext!,
                       initialDate: _selectedDateRange.start,
                       initialDate2: _selectedDateRange.end,
-                      firstDate: DateTime.now().subtract(const Duration(days: 7)),
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 7)),
                       lastDate: DateTime.now().add(const Duration(days: 14000)),
                       width: 400,
                       weekendDaysColor: Colors.red,
@@ -191,13 +192,31 @@ class _MyAppState extends State<MyApp> {
                       // },
                       // showDisabledCursor: true,
                       selectTodayOnClick: _selectTodayOnClick,
+                      events: [
+                        WebDayEvent(
+                          eventDate: DateTime(2026, 5, 11),
+                        ),
+                        WebDayEvent(
+                          eventDate: DateTime(2026, 5, 11),
+                          customEventWidget: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: Colors.amber,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                      ],
                     );
                     if (pickedDateRange != null) {
                       _selectedDateRange = pickedDateRange;
                       if (_enableRangeSelection) {
-                        _controller.text = "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
+                        _controller.text =
+                            "From ${_selectedDateRange.start.toString().split(' ')[0]} to ${_selectedDateRange.end.toString().split(' ')[0]}";
                       } else {
-                        _controller.text = _selectedDateRange.start.toString().split(' ')[0];
+                        _controller.text =
+                            _selectedDateRange.start.toString().split(' ')[0];
                       }
                     }
                   },
