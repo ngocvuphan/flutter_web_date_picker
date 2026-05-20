@@ -108,6 +108,22 @@ Returns a `Future<DateTimeRange?>`:
                 // },
                 // showDisabledCursor: true,
                 selectTodayOnClick: _selectTodayOnClick,
+                events: [
+                    WebDayEvent(
+                        eventDate: DateTime(2026, 5, 11),
+                    ),
+                    WebDayEvent(
+                        eventDate: DateTime(2026, 5, 11),
+                        customEventWidget: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                                color: Colors.amber,
+                                shape: BoxShape.circle,
+                            ),
+                        ),
+                    ),
+                ],
         )
     ...
 ```

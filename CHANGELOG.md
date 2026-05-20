@@ -1,3 +1,7 @@
+# [0.1.12] (5/20/2026)
+
+feat: Day events dots by [matteoberla:main](https://github.com/matteoberla/flutter_web_date_picker/tree/main)
+
 # [0.1.11] (4/14/2026)
 
 feat: support keyboard navigation by [Ajaystefin:feature/keyboard-navigation-day-grid](https://github.com/Ajaystefin/flutter_web_date_picker/tree/feature/keyboard-navigation-day-grid)
