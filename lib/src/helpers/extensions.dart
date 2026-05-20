@@ -25,19 +25,26 @@ extension DateTimeExtension on DateTime {
   }) {
     DateTime start = DateTime(year, month).toUtc();
     if (includeTrailingAndLeadingDates) {
-      start = start.subtract(Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
+      start = start.subtract(
+          Duration(days: (start.weekday - firstDayOfWeekIndex + 7) % 7));
     }
-    DateTime end = includeTrailingAndLeadingDates ? start.add(Duration(days: numberCellsOfMonth)).toUtc() : DateTime(year, month + 1, 0).toUtc();
+    DateTime end = includeTrailingAndLeadingDates
+        ? start.add(Duration(days: numberCellsOfMonth)).toUtc()
+        : DateTime(year, month + 1, 0).toUtc();
     return DateTimeRange(start: start, end: end);
   }
 
   bool isInDateRange(DateTime start, DateTime end) {
     assert(start.compareToEx(end, DateTimeCompareMode.day) <= 0);
-    return compareToEx(start, DateTimeCompareMode.day) >= 0 && compareToEx(end, DateTimeCompareMode.day) <= 0;
+    return compareToEx(start, DateTimeCompareMode.day) >= 0 &&
+        compareToEx(end, DateTimeCompareMode.day) <= 0;
   }
 
   bool isBlockedDate(List<DateTime> blockedDates, DateTime currentDate) {
-    return blockedDates.any((date) => date.year == currentDate.year && date.month == currentDate.month && date.day == currentDate.day);
+    return blockedDates.any((date) =>
+        date.year == currentDate.year &&
+        date.month == currentDate.month &&
+        date.day == currentDate.day);
   }
 
   int compareToEx(DateTime other, DateTimeCompareMode mode) {
@@ -50,6 +57,10 @@ extension DateTimeExtension on DateTime {
       return monthCmp;
     }
     return day.compareTo(other.day);
+  }
+
+  bool isSameDay(DateTime other) {
+    return year == other.year && month == other.month && day == other.day;
   }
 }
 
